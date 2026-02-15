@@ -43,7 +43,7 @@
   "cmd.tpask.send": "Teleportatieverzoek naar ${0} is verzonden!",
   "cmd.tpask.error.exists": "TPA verzoek niet verzonden. Je hebt al een teleportatieverzoek openstaan naar ${0}.",
   "cmd.tpaskhere.receive": "${0} heeft gevraagd om naar jou toe te teleporteren.",
-  "cmd.tpcancel.feedback": "Teleportatieverzoek naar ${0} is geannuleerd.",
+  "cmd.tpcancel.feedback": "Teleportatieverzoek geannuleerd.",
   "cmd.tpcancel.error.no_exists": "Er is geen teleportatieverzoek dat momenteel kan worden geannuleerd.",
   "cmd.tpdeny.feedback": "Teleportatieverzoek geweigerd.",
   "cmd.warp.delete.feedback": "Warp '${0}' is verwijderd.",
