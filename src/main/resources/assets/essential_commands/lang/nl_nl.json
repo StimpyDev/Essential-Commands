@@ -35,7 +35,7 @@
   "cmd.spawn.location_name": "spawn",
   "cmd.spawn.tp.error.no_spawn_set": "Spawnpunt niet ingesteld.",
   "cmd.spawn.set.feedback": "Spawnpunt ingesteld op ${0}.",
-  "cmd.tpaccept.feedback": "Teleportatieverzoek geaccepteerd door ${1}.",
+  "cmd.tpaccept.feedback": "Teleportatieverzoek geaccepteerd door ${0}.",
   "cmd.tpa_reply.error.shortcut_none_exist": "Geen openstaande teleportatieverzoeken gevonden.",
   "cmd.tpa_reply.error.shortcut_more_than_one": "Er zijn meerdere teleportatieverzoeken ontvangen. Geef de naam van de speler wiens verzoek je wilt accepteren.",
   "cmd.tpa_reply.error.no_request_from_target": "Er is geen teleportatieverzoek openstaand van de opgegeven speler.",
