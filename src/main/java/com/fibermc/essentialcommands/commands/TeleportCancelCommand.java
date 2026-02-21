@@ -13,31 +13,41 @@ import net.minecraft.server.level.ServerPlayer;
 
 import dev.jpcode.eccore.util.TextUtil;
 
+import java.util.List;
+
 public class TeleportCancelCommand implements Command<CommandSourceStack> {
 
     public TeleportCancelCommand() {}
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        //Store command sender
+        // Store command sender
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
         var senderPlayerData = PlayerData.access(senderPlayer);
 
         var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
 
-        if (existingTeleportRequests.size() == 0) {
+        if (existingTeleportRequests.isEmpty()) {
             senderPlayerData.sendCommandError("cmd.tpcancel.error.no_exists");
             return 0;
         }
+        
+        var targetPlayerDataList = existingTeleportRequests.stream()
+            .map(TeleportRequest::getTargetPlayerData)
+            .toList();
 
-        var targetPlayers = existingTeleportRequests.stream().map(TeleportRequest::getTargetPlayerData).toList();
         existingTeleportRequests.clear();
+        
+        List<Component> targetNames = targetPlayerDataList.stream()
+            .map(data -> {
+                ServerPlayer p = data.getPlayer();
+                return (p != null) ? p.getDisplayName() : Component.literal(data.getPlayerName());
+            })
+            .toList();
 
         senderPlayerData.sendCommandFeedback(
             "cmd.tpcancel.feedback",
-            TextUtil.join(
-                targetPlayers.stream().map(PlayerData::getPlayer).map(ServerPlayer::getDisplayName).toList(),
-                Component.literal(", "))
+            TextUtil.join(targetNames, Component.literal(", "))
         );
 
         return SINGLE_SUCCESS;
