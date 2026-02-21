@@ -31,20 +31,20 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
             senderPlayerData.sendCommandError("cmd.tpcancel.error.no_exists");
             return 0;
         }
-        
-        var targetPlayerDataList = existingTeleportRequests.stream()
-            .map(TeleportRequest::getTargetPlayerData)
-            .toList();
-
-        existingTeleportRequests.clear();
-        
-        List<Component> targetNames = targetPlayerDataList.stream()
-            .map(data -> {
-                ServerPlayer p = data.getPlayer();
-                // data.getName() returns the Component (Name) of the player.
-                return (p != null) ? p.getDisplayName() : data.getName();
+    
+        List<Component> targetNames = existingTeleportRequests.stream()
+            .map(request -> {
+                ServerPlayer p = request.getTargetPlayer();
+                if (p != null) {
+                    return p.getDisplayName();
+                }
+                // Fallback to a literal "Offline Player" if we can't find a name method
+                return Component.literal("Offline Player");
             })
             .toList();
+
+        // Now clear the requests
+        existingTeleportRequests.clear();
 
         senderPlayerData.sendCommandFeedback(
             "cmd.tpcancel.feedback",
