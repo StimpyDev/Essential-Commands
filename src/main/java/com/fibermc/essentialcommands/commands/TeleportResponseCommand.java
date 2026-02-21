@@ -21,7 +21,7 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return exec(
             context,
-            context.getSource().getPlayer(),
+            context.getSource().getPlayerOrException(), // Use OrException for safety
             EntityArgument.getPlayer(context, "target_player")
         );
     }
@@ -35,13 +35,20 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
         if (incomingTeleportRequests.size() > 1) {
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.shortcut_more_than_one", TextFormatType.Error));
-        } else if (incomingTeleportRequests.size() < 1) {
+        } else if (incomingTeleportRequests.isEmpty()) { // Use isEmpty() for clarity
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.shortcut_none_exist", TextFormatType.Error));
         }
 
-        ServerPlayer teleportRequestSender = incomingTeleportRequests.values().stream().findFirst().get().getSenderPlayer();
+        // Get the request safely
+        TeleportRequest anyRequest = incomingTeleportRequests.values().stream().findFirst().get();
+        ServerPlayer teleportRequestSender = anyRequest.getSenderPlayer();
+
+        // Handle the case where the sender is offline
         if (teleportRequestSender == null) {
+            // Clean up the "dead" request so it doesn't stay in the map
+            incomingTeleportRequests.remove(anyRequest.getSenderPlayerData().getUuid());
+            
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.no_request_from_target", TextFormatType.Error));
         }
@@ -50,5 +57,4 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
     }
 
     abstract int exec(CommandContext<CommandSourceStack> context, ServerPlayer respondingPlayer, ServerPlayer requesterPlayer);
-
 }
