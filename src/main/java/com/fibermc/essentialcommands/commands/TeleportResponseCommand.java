@@ -21,7 +21,7 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         return exec(
             context,
-            context.getSource().getPlayerOrException(), // Use OrException for safety
+            context.getSource().getPlayerOrException(),
             EntityArgument.getPlayer(context, "target_player")
         );
     }
@@ -35,19 +35,20 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
         if (incomingTeleportRequests.size() > 1) {
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.shortcut_more_than_one", TextFormatType.Error));
-        } else if (incomingTeleportRequests.isEmpty()) { // Use isEmpty() for clarity
+        } else if (incomingTeleportRequests.size() == 0) {
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.shortcut_none_exist", TextFormatType.Error));
         }
 
-        // Get the request safely
-        TeleportRequest anyRequest = incomingTeleportRequests.values().stream().findFirst().get();
+        // Get the request entry safely
+        var entry = incomingTeleportRequests.entrySet().stream().findFirst().get();
+        UUID senderUuid = entry.getKey();
+        TeleportRequest anyRequest = entry.getValue();
         ServerPlayer teleportRequestSender = anyRequest.getSenderPlayer();
 
         // Handle the case where the sender is offline
         if (teleportRequestSender == null) {
-            // Clean up the "dead" request so it doesn't stay in the map
-            incomingTeleportRequests.remove(anyRequest.getSenderPlayerData().getUuid());
+            incomingTeleportRequests.remove(senderUuid);
             
             throw CommandUtil.createSimpleException(
                 ecText.getText("cmd.tpa_reply.error.no_request_from_target", TextFormatType.Error));
