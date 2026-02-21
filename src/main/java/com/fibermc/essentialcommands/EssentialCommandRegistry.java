@@ -132,6 +132,7 @@ public final class EssentialCommandRegistry {
                 .requires(ECPerms.require(ECPerms.Registry.home_tp, 0))
                 .executes(new HomeCommand()::runDefault)
                 .then(argument("home_name", StringArgumentType.word())
+                    .suggests(HomeCommand.Suggestion.LIST_SUGGESTION_PROVIDER)
                     .executes(new HomeCommand()));
 
             homeSetBuilder
