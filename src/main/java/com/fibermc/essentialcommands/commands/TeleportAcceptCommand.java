@@ -14,23 +14,31 @@ import net.minecraft.server.level.ServerPlayer;
 public class TeleportAcceptCommand extends TeleportResponseCommand {
     protected int exec(CommandContext<CommandSourceStack> context, ServerPlayer respondingPlayer, ServerPlayer requesterPlayer) {
         var senderPlayerData = PlayerData.access(respondingPlayer);
+
+        // Check if the requester is still online
+        if (requesterPlayer == null) {
+            senderPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
+            return -1;
+        }
+
         var targetPlayerData = ((ServerPlayerEntityAccess) requesterPlayer).ec$getPlayerData();
 
-        //identify if target player did indeed request to teleport. Continue if so, otherwise throw exception.
+        // Identify if target player did indeed request to teleport.
         Optional<TeleportRequest> teleportRequest = targetPlayerData.getSentTeleportRequests()
             .getRequestToPlayer(senderPlayerData);
+
         if (teleportRequest.isPresent() && teleportRequest.get().getTargetPlayer().equals(respondingPlayer)) {
 
-            //inform target player that teleport has been accepted via chat
+            // Inform target player that teleport has been accepted
             targetPlayerData.sendMessage("cmd.tpaccept.feedback");
 
-            //Conduct teleportation
+            // Conduct teleportation
             teleportRequest.get().queue();
 
-            //Send message to command sender confirming that request has been accepted
+            // Send message to command sender confirming acceptance
             senderPlayerData.sendMessage("cmd.tpaccept.feedback");
 
-            // Remove the tp request, as it has been completed.
+            // Remove the tp request
             teleportRequest.get().end();
 
             return SINGLE_SUCCESS;
@@ -38,6 +46,5 @@ public class TeleportAcceptCommand extends TeleportResponseCommand {
             senderPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
             return -1;
         }
-
     }
 }
