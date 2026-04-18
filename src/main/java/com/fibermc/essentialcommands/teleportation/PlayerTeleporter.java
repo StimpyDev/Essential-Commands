@@ -47,12 +47,13 @@ public final class PlayerTeleporter {
 //        if (pData.getTpCooldown() < 0 || player.getEntityWorld().getServer().getPlayerManager().isOperator(player.getGameProfile())) {
 //            //send TP request to tpManager
 //        }
-        if (playerHasTpRulesBypass(player, ECPerms.Registry.bypass_teleport_delay) || CONFIG.TELEPORT_DELAY_TICKS <= 0) {
-            teleport(queuedTeleport.getPlayerData(), queuedTeleport.getDest(), queuedTeleport.getDestName());
-        } else {
-            TeleportManager.getInstance().queueTeleport(queuedTeleport);
-        }
+        if (CONFIG.TELEPORT_DELAY_TICKS <= 0) {
+        teleport(queuedTeleport.getPlayerData(), queuedTeleport.getDest(), queuedTeleport.getDestName());
+    } else {
+        // Nu komt iedereen hier terecht, ook operators
+        TeleportManager.getInstance().queueTeleport(queuedTeleport);
     }
+}
 
     public static void requestTeleport(ServerPlayer playerEntity, MinecraftLocation dest, MutableComponent destName) {
         requestTeleport(((ServerPlayerEntityAccess) playerEntity).ec$getPlayerData(), dest, destName);
