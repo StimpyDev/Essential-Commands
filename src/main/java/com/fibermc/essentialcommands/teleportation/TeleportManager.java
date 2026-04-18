@@ -47,7 +47,7 @@ public final class TeleportManager {
         PlayerDataManager.TICK_EVENT.register(((playerDataManager, server) -> instance.tick(server)));
     }
 
-    public void tick(MinecraftServer server) {
+public void tick(MinecraftServer server) {
         // Remove any requests that have ended since the last tick.
         activeTeleportRequests.removeIf(TeleportRequest::isEnded);
         // decrement the tp timer for all players that have put in a tp request
@@ -80,23 +80,37 @@ public final class TeleportManager {
         var shouldInterruptTeleportOnMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE;
         var maxMoveBeforeInterrupt = CONFIG.TELEPORT_INTERRUPT_ON_MOVE_AMOUNT;
         Iterator<Map.Entry<UUID, QueuedTeleport>> tpQueueIter = queuedTeleportMap.entrySet().iterator();
+        
         while (tpQueueIter.hasNext()) {
             Map.Entry<UUID, QueuedTeleport> entry = tpQueueIter.next();
             QueuedTeleport queuedTeleport = entry.getValue();
             queuedTeleport.tick(server);
 
             var playerData = queuedTeleport.getPlayerData();
+            var player = playerData.getPlayer();
+            
+            long ticksRemaining = queuedTeleport.getTicksRemaining();
+            
+            if (ticksRemaining > 0 && ticksRemaining % 20 == 0) {
+                int secondsRemaining = (int) (ticksRemaining / 20);
+                playerData.sendMessage(
+                    "teleport.queued",
+                    queuedTeleport.getDestName(),
+                    net.minecraft.network.chat.Component.literal(String.valueOf(secondsRemaining))
+                );
+            }
+
             if (shouldInterruptTeleportOnMove
                 && playerData.hasMovedThisTick()
-                && playerData.getPlayer().position().distanceTo(queuedTeleport.initialPosition) > maxMoveBeforeInterrupt
-                && !PlayerTeleporter.playerHasTpRulesBypass(playerData.getPlayer(), ECPerms.Registry.bypass_teleport_interrupt_on_move)
+                && player.position().distanceTo(queuedTeleport.initialPosition) > maxMoveBeforeInterrupt
+                && !PlayerTeleporter.playerHasTpRulesBypass(player, ECPerms.Registry.bypass_teleport_interrupt_on_move)
             ) {
                 playerData.sendError("teleport.interrupted.moved");
                 tpQueueIter.remove();
                 continue;
             }
 
-            if (queuedTeleport.getTicksRemaining() < 0) {
+            if (ticksRemaining < 0) {
                 tpQueueIter.remove();
                 PlayerTeleporter.teleport(queuedTeleport);
             }
