@@ -140,6 +140,12 @@ public void tick(MinecraftServer server) {
         var senderPlayerData = PlayerData.access(requestSender);
         var targetPlayerData = PlayerData.access(targetPlayer);
 
+        if (requestSender.getUUID().equals(targetPlayer.getUUID())) {
+            senderPlayerData.sendError("teleport.error.self_teleport");
+            return;
+        }
+        // ----------------------------------------------
+
         var teleportRequest = new TeleportRequest(requestSender, targetPlayer, requestType);
         senderPlayerData.addSentTeleportRequest(teleportRequest);
         targetPlayerData.addIncomingTeleportRequest(teleportRequest);
