@@ -29,19 +29,20 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
         var senderPlayerData = PlayerData.access(senderPlayer);
         var targetPlayerData = PlayerData.access(targetPlayer);
 
-        // Don't allow spamming same target.
-        {
-            var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
-                .getRequestToPlayer(targetPlayerData);
-            if (existingTeleportRequest.isPresent()) {
-                PlayerData.access(senderPlayer).sendCommandError(
-                    "cmd.tpask.error.exists",
-                    existingTeleportRequest.get().getTargetPlayer().getDisplayName());
-                return 0;
-            }
+        var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
+            .getRequestToPlayer(targetPlayerData);
+        if (existingTeleportRequest.isPresent()) {
+            senderPlayerData.sendCommandError(
+                "cmd.tpask.error.exists",
+                existingTeleportRequest.get().getTargetPlayer().getDisplayName());
+            return 0;
         }
 
-        //inform target player of tp request via chat
+        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
+        if (!success) {
+            return 0;
+        }
+
         var targetPlayerEcText = ECText.access(targetPlayer);
         var targetPlayerProfile = PlayerProfile.access(targetPlayer);
         targetPlayerData.sendMessage(
@@ -58,10 +59,6 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
-        //Mark TPRequest Sender as having requested a teleport
-        tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
-
-        //inform command sender that request has been sent
         var senderPlayerProfile = PlayerProfile.access(senderPlayer);
         var targetPlayerText = targetPlayer.getDisplayName().copy().withStyle(senderPlayerProfile.getStyle(TextFormatType.Accent));
         senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayerText);
