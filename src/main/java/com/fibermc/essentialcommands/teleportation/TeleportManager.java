@@ -131,26 +131,21 @@ public void tick(MinecraftServer server) {
         }
     }
 
-    public void startTpRequest(
-        ServerPlayer requestSender,
-        ServerPlayer targetPlayer,
-        TeleportRequest.Type requestType
-    )
-    {
-        var senderPlayerData = PlayerData.access(requestSender);
-        var targetPlayerData = PlayerData.access(targetPlayer);
+   public boolean startTpRequest(ServerPlayer requestSender, ServerPlayer targetPlayer, TeleportRequest.Type requestType) {
+    var senderPlayerData = PlayerData.access(requestSender);
+    var targetPlayerData = PlayerData.access(targetPlayer);
 
-        if (requestSender.getUUID().equals(targetPlayer.getUUID())) {
-            senderPlayerData.sendError("teleport.error.self_teleport");
-            return;
-        }
-        // ----------------------------------------------
-
-        var teleportRequest = new TeleportRequest(requestSender, targetPlayer, requestType);
-        senderPlayerData.addSentTeleportRequest(teleportRequest);
-        targetPlayerData.addIncomingTeleportRequest(teleportRequest);
-        activeTeleportRequests.add(teleportRequest);
+    if (requestSender.getUUID().equals(targetPlayer.getUUID())) {
+        senderPlayerData.sendError("teleport.error.self_teleport");
+        return false;
     }
+
+    var teleportRequest = new TeleportRequest(requestSender, targetPlayer, requestType);
+    senderPlayerData.addSentTeleportRequest(teleportRequest);
+    targetPlayerData.addIncomingTeleportRequest(teleportRequest);
+    activeTeleportRequests.add(teleportRequest);
+    return true;
+}
 
     public void startTpCooldown(ServerPlayer player) {
         final int teleportCooldownTicks = (int) (CONFIG.TELEPORT_COOLDOWN * TimeUtil.TPS);
