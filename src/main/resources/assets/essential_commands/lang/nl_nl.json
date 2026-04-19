@@ -84,7 +84,7 @@
   "player.afk.exit": "${0} is niet meer AFK.",
   "teleport.error.interdimensional_teleport_disabled": "Teleporteren mislukt. Reden: interdimensionale teleportatie is uitgeschakeld.",
   "teleport.error.self_teleport": "Je kunt geen teleportatieverzoek naar jezelf sturen!",
-  "teleport.queued": "Teleportatie naar ${0} over: ${1} seconden... Niet Bewegen!"
+  "teleport.queued": "Teleportatie naar ${0} over: ${1} seconden... Niet Bewegen!",
   "teleport.done": "Teleportatie naar ${0} voltooid.",
   "teleport.interrupted.damage": "Teleportatie onderbroken vanwege schade.",
   "teleport.interrupted.moved": "Teleportatie onderbroken omdat je bewoog.",
