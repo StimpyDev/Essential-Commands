@@ -12,38 +12,40 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportAcceptCommand extends TeleportResponseCommand {
+    
+    @Override
     protected int exec(CommandContext<CommandSourceStack> context, ServerPlayer respondingPlayer, ServerPlayer requesterPlayer) {
-        var senderPlayerData = PlayerData.access(respondingPlayer);
+        var respondingPlayerData = PlayerData.access(respondingPlayer);
 
-        // Check if the requester is still online
         if (requesterPlayer == null) {
-            senderPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
+            respondingPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
             return -1;
         }
 
-        var targetPlayerData = ((ServerPlayerEntityAccess) requesterPlayer).ec$getPlayerData();
+        var requesterPlayerData = ((ServerPlayerEntityAccess) requesterPlayer).ec$getPlayerData();
 
-        // Identify if target player did indeed request to teleport.
-        Optional<TeleportRequest> teleportRequest = targetPlayerData.getSentTeleportRequests()
-            .getRequestToPlayer(senderPlayerData);
+        Optional<TeleportRequest> teleportRequest = requesterPlayerData.getSentTeleportRequests()
+            .getRequestToPlayer(respondingPlayerData);
 
         if (teleportRequest.isPresent() && teleportRequest.get().getTargetPlayer().equals(respondingPlayer)) {
 
-            // Inform target player that teleport has been accepted
-            targetPlayerData.sendMessage("cmd.tpaccept.feedback");
+            requesterPlayerData.sendMessage(
+                "cmd.tpaccept.feedback",
+                respondingPlayer.getDisplayName()
+            );
 
-            // Conduct teleportation
             teleportRequest.get().queue();
 
-            // Send message to command sender confirming acceptance
-            senderPlayerData.sendMessage("cmd.tpaccept.feedback");
+            respondingPlayerData.sendMessage(
+                "cmd.tpaccept.feedback",
+                requesterPlayer.getDisplayName()
+            );
 
-            // Remove the tp request
             teleportRequest.get().end();
 
             return SINGLE_SUCCESS;
         } else {
-            senderPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
+            respondingPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
             return -1;
         }
     }
