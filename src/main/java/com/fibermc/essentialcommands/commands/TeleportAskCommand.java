@@ -7,7 +7,6 @@ import com.fibermc.essentialcommands.teleportation.TeleportManager;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
 import com.fibermc.essentialcommands.text.ECText;
-import com.fibermc.essentialcommands.text.TextFormatType;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -37,17 +36,16 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
                 existingTeleportRequest.get().getTargetPlayer().getDisplayName());
             return 0;
         }
-
+        
         boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
         if (!success) {
             return 0;
         }
 
         var targetPlayerEcText = ECText.access(targetPlayer);
-        var targetPlayerProfile = PlayerProfile.access(targetPlayer);
         targetPlayerData.sendMessage(
             "cmd.tpask.receive",
-            senderPlayer.getDisplayName().copy().withStyle(targetPlayerProfile.getStyle(TextFormatType.Accent))
+            senderPlayer.getDisplayName()
         );
 
         String senderName = senderPlayer.getGameProfile().name();
@@ -59,10 +57,11 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
-        var senderPlayerProfile = PlayerProfile.access(senderPlayer);
-        var targetPlayerText = targetPlayer.getDisplayName().copy().withStyle(senderPlayerProfile.getStyle(TextFormatType.Accent));
-        senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayerText);
+        senderPlayerData.sendCommandFeedback(
+            "cmd.tpask.send", 
+            targetPlayer.getDisplayName()
+        );
 
-        return SINGLE_SUCCESS;
+        return Command.SINGLE_SUCCESS;
     }
 }
