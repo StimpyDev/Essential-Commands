@@ -27,23 +27,25 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         var senderPlayerData = PlayerData.access(senderPlayer);
         var targetPlayerData = PlayerData.access(targetPlayer);
 
-        // Don't allow spamming same target.
-        {
-            var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
-                .getRequestToPlayer(targetPlayerData);
-            if (existingTeleportRequest.isPresent()) {
-                PlayerData.access(senderPlayer).sendCommandError(
-                    "cmd.tpask.error.exists",
-                    existingTeleportRequest.get().getTargetPlayer().getDisplayName());
-                return 0;
-            }
+        var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
+            .getRequestToPlayer(targetPlayerData);
+        if (existingTeleportRequest.isPresent()) {
+            senderPlayerData.sendCommandError(
+                "cmd.tpask.error.exists",
+                existingTeleportRequest.get().getTargetPlayer().getDisplayName());
+            return 0;
         }
 
-        //inform target player of tp request via chat
+        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_HERE);
+
+        if (!success) {
+            return 0;
+        }
+        
         var targetPlayerEcText = ECText.access(targetPlayer);
         targetPlayerData.sendMessage(
             "cmd.tpaskhere.receive",
-            targetPlayerEcText.accent(senderPlayer.getScoreboardName())
+            senderPlayer.getDisplayName()
         );
 
         String senderName = senderPlayer.getGameProfile().name();
@@ -55,12 +57,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
-        //Mark TPRequest Sender as having requested a teleport
-        tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_HERE);
-
-        //inform command sender that request has been sent
-        var targetPlayerText = ECText.access(senderPlayer).accent(targetPlayer.getScoreboardName());
-        senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayerText);
+        senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayer.getDisplayName());
 
         return SINGLE_SUCCESS;
     }
