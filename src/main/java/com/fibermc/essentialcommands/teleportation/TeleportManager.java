@@ -11,6 +11,7 @@ import com.fibermc.essentialcommands.playerdata.PlayerDataManager;
 import com.fibermc.essentialcommands.text.TextFormatType;
 import com.fibermc.essentialcommands.types.MinecraftLocation;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,14 +48,12 @@ public final class TeleportManager {
         PlayerDataManager.TICK_EVENT.register(((playerDataManager, server) -> instance.tick(server)));
     }
 
-public void tick(MinecraftServer server) {
-        // Remove any requests that have ended since the last tick.
+    public void tick(MinecraftServer server) {
         activeTeleportRequests.removeIf(TeleportRequest::isEnded);
-        // decrement the tp timer for all players that have put in a tp request
+        
         for (TeleportRequest teleportRequest : activeTeleportRequests) {
             teleportRequest.incrementAgeTicks();
 
-            // Handle teleport expiry
             if (teleportRequest.getAgeTicks() > CONFIG.TELEPORT_REQUEST_DURATION_TICKS) {
                 teleportRequest.end();
                 teleportRequest.getSenderPlayerData().sendMessage(
@@ -88,15 +87,18 @@ public void tick(MinecraftServer server) {
 
             var playerData = queuedTeleport.getPlayerData();
             var player = playerData.getPlayer();
+            var playerAccess = (ServerPlayerEntityAccess) player;
             
             long ticksRemaining = queuedTeleport.getTicksRemaining();
             
             if (ticksRemaining > 0 && ticksRemaining % 20 == 0) {
                 int secondsRemaining = (int) (ticksRemaining / 20);
+                var accentStyle = playerAccess.ec$getProfile().getStyle(TextFormatType.Accent);
+                
                 playerData.sendMessage(
                     "teleport.queued",
                     queuedTeleport.getDestName(),
-                    net.minecraft.network.chat.Component.literal(String.valueOf(secondsRemaining))
+                    Component.literal(String.valueOf(secondsRemaining)).withStyle(accentStyle)
                 );
             }
 
@@ -131,21 +133,21 @@ public void tick(MinecraftServer server) {
         }
     }
 
-   public boolean startTpRequest(ServerPlayer requestSender, ServerPlayer targetPlayer, TeleportRequest.Type requestType) {
-    var senderPlayerData = PlayerData.access(requestSender);
-    var targetPlayerData = PlayerData.access(targetPlayer);
+    public boolean startTpRequest(ServerPlayer requestSender, ServerPlayer targetPlayer, TeleportRequest.Type requestType) {
+        var senderPlayerData = PlayerData.access(requestSender);
+        var targetPlayerData = PlayerData.access(targetPlayer);
 
-    if (requestSender.getUUID().equals(targetPlayer.getUUID())) {
-        senderPlayerData.sendError("teleport.error.self_teleport");
-        return false;
+        if (requestSender.getUUID().equals(targetPlayer.getUUID())) {
+            senderPlayerData.sendError("teleport.error.self_teleport");
+            return false;
+        }
+
+        var teleportRequest = new TeleportRequest(requestSender, targetPlayer, requestType);
+        senderPlayerData.addSentTeleportRequest(teleportRequest);
+        targetPlayerData.addIncomingTeleportRequest(teleportRequest);
+        activeTeleportRequests.add(teleportRequest);
+        return true;
     }
-
-    var teleportRequest = new TeleportRequest(requestSender, targetPlayer, requestType);
-    senderPlayerData.addSentTeleportRequest(teleportRequest);
-    targetPlayerData.addIncomingTeleportRequest(teleportRequest);
-    activeTeleportRequests.add(teleportRequest);
-    return true;
-}
 
     public void startTpCooldown(ServerPlayer player) {
         final int teleportCooldownTicks = (int) (CONFIG.TELEPORT_COOLDOWN * TimeUtil.TPS);
@@ -155,7 +157,6 @@ public void tick(MinecraftServer server) {
         playersOnTeleportCooldown.add(playerData);
     }
 
-    // Generally, you should use PlayerTeleporter.requestTeleport instead of calling the queueTeleport methods directly.
     void queueTeleport(ServerPlayer player, MinecraftLocation dest, MutableComponent destName) {
         queueTeleport(new QueuedLocationTeleport(PlayerData.access(player), dest, destName));
     }
@@ -179,10 +180,14 @@ public void tick(MinecraftServer server) {
         }
 
         playerAccess.ec$setQueuedTeleport(queuedTeleport);
+        
+        var accentStyle = playerAccess.ec$getProfile().getStyle(TextFormatType.Accent);
+        int initialSeconds = (int) (CONFIG.TELEPORT_DELAY_TICKS / 20);
+
         playerData.sendMessage(
             "teleport.queued",
-            queuedTeleport.getDestName().setStyle(playerAccess.ec$getProfile().getStyle(TextFormatType.Accent)),
-            playerAccess.ec$getEcText().accent(String.format("%.1f", TimeUtil.ticksToSeconds(CONFIG.TELEPORT_DELAY_TICKS)))
+            queuedTeleport.getDestName(),
+            Component.literal(String.valueOf(initialSeconds)).withStyle(accentStyle)
         );
     }
 }
