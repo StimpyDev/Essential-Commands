@@ -2,7 +2,6 @@ package com.fibermc.essentialcommands.commands;
 
 import com.fibermc.essentialcommands.ManagerLocator;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
-import com.fibermc.essentialcommands.playerdata.PlayerProfile;
 import com.fibermc.essentialcommands.teleportation.TeleportManager;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
@@ -36,8 +35,9 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
                 existingTeleportRequest.get().getTargetPlayer().getDisplayName());
             return 0;
         }
-        
+
         boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
+        
         if (!success) {
             return 0;
         }
@@ -57,7 +57,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
-        senderPlayerData.sendCommandFeedback(
+        senderPlayerData.sendMessage(
             "cmd.tpask.send", 
             targetPlayer.getDisplayName()
         );
