@@ -28,7 +28,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         ServerPlayer targetPlayer = EntityArgument.getPlayer(context, "target_player");
         var senderPlayerData = PlayerData.access(senderPlayer);
         var targetPlayerData = PlayerData.access(targetPlayer);
-
+        
         var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
             .getRequestToPlayer(targetPlayerData);
         if (existingTeleportRequest.isPresent()) {
@@ -45,22 +45,26 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         }
         
         targetPlayerData.sendMessage(
-            "cmd.tpaskhere.receive",
-            senderPlayer.getDisplayName()
+            Component.translatable("cmd.tpaskhere.receive", senderPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
         );
 
         String senderName = senderPlayer.getGameProfile().name();
+        
         new ChatConfirmationPrompt(
             targetPlayer,
             "/tpaccept " + senderName,
             "/tpdeny " + senderName,
             Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
-                .withStyle(ChatFormatting.GREEN),
+                .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
             Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
-                .withStyle(ChatFormatting.RED)
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).send();
 
-        senderPlayerData.sendMessage("cmd.tpask.send", targetPlayer.getDisplayName());
+        senderPlayerData.sendMessage(
+            Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
+        );
 
         return Command.SINGLE_SUCCESS;
     }
