@@ -44,7 +44,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             return 0;
         }
 
-        targetPlayerData.sendMessage(
+        targetPlayer.sendSystemMessage(
             Component.translatable("cmd.tpask.receive", senderPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
         );
@@ -60,8 +60,8 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).send();
-        
-        senderPlayerData.sendMessage(
+
+        senderPlayer.sendSystemMessage(
             Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
         );
