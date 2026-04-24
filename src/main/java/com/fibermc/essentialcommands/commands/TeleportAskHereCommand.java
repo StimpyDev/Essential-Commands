@@ -44,7 +44,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
             return 0;
         }
         
-        targetPlayerData.sendMessage(
+        targetPlayer.sendSystemMessage(
             Component.translatable("cmd.tpaskhere.receive", senderPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
         );
@@ -61,7 +61,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).send();
 
-        senderPlayerData.sendMessage(
+        targetPlayer.sendSystemMessage(
             Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
         );
