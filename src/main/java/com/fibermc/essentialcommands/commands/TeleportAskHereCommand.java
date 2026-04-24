@@ -11,13 +11,15 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-public class TeleportAskCommand implements Command<CommandSourceStack> {
+public class TeleportAskHereCommand implements Command<CommandSourceStack> {
 
-    public TeleportAskCommand() {}
+    public TeleportAskHereCommand() {}
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -36,15 +38,14 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             return 0;
         }
 
-        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
+        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_HERE);
 
         if (!success) {
             return 0;
         }
-
-        var targetPlayerEcText = ECText.access(targetPlayer);
+        
         targetPlayerData.sendMessage(
-            "cmd.tpask.receive",
+            "cmd.tpaskhere.receive",
             senderPlayer.getDisplayName()
         );
 
@@ -53,10 +54,11 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             targetPlayer,
             "/tpaccept " + senderName,
             "/tpdeny " + senderName,
-            targetPlayerEcText.accent("[" + ECText.getInstance().getString("generic.accept") + "]"),
-            targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
+            Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
+                .withStyle(ChatFormatting.GREEN),
+            Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
+                .withStyle(ChatFormatting.RED)
         ).send();
-
 
         senderPlayerData.sendMessage("cmd.tpask.send", targetPlayer.getDisplayName());
 
