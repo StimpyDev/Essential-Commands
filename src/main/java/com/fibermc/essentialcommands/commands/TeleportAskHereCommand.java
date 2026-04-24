@@ -57,6 +57,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
+
         senderPlayerData.sendMessage("cmd.tpask.send", targetPlayer.getDisplayName());
 
         return Command.SINGLE_SUCCESS;
