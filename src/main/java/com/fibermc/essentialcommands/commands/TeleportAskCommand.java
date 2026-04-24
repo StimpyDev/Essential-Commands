@@ -56,11 +56,11 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             "/tpaccept " + senderName,
             "/tpdeny " + senderName,
             Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
-                .withStyle(ChatFormatting.GREEN),
+                .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
             Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
-                .withStyle(ChatFormatting.RED)
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).send();
-
+        
         senderPlayerData.sendMessage(
             Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
