@@ -45,8 +45,8 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
         }
 
         targetPlayerData.sendMessage(
-            "cmd.tpask.receive",
-            senderPlayer.getDisplayName()
+            Component.translatable("cmd.tpask.receive", senderPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
         );
 
         String senderName = senderPlayer.getGameProfile().name();
@@ -62,8 +62,8 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
         ).send();
 
         senderPlayerData.sendMessage(
-            "cmd.tpask.send", 
-            targetPlayer.getDisplayName()
+            Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
         );
 
         return Command.SINGLE_SUCCESS;
