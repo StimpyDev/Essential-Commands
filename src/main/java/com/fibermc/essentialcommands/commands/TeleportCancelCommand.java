@@ -42,13 +42,18 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
             })
             .collect(Collectors.toList());
 
+        var requestsCopy = existingTeleportRequests.stream().collect(Collectors.toList());
+        for (TeleportRequest request : requestsCopy) {
+            request.end(); 
+        }
+        
         existingTeleportRequests.clear();
 
-        senderPlayerData.sendCommandFeedback(
+        senderPlayerData.sendMessage(
             "cmd.tpcancel.feedback",
             TextUtil.join(targetNames, Component.literal(", "))
         );
 
-        return SINGLE_SUCCESS;
+        return Command.SINGLE_SUCCESS;
     }
 }
