@@ -1,57 +1,68 @@
 package com.fibermc.essentialcommands.commands;
 
+import com.fibermc.essentialcommands.ManagerLocator;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
+import com.fibermc.essentialcommands.teleportation.TeleportManager;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
+import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
+import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import dev.jpcode.eccore.util.TextUtil;
+public class TeleportAskCommand implements Command<CommandSourceStack> {
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class TeleportCancelCommand implements Command<CommandSourceStack> {
-
-    public TeleportCancelCommand() {}
+    public TeleportAskCommand() {}
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        TeleportManager tpMgr = ManagerLocator.getInstance().getTpManager();
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
+        ServerPlayer targetPlayer = EntityArgument.getPlayer(context, "target_player");
         var senderPlayerData = PlayerData.access(senderPlayer);
 
-        var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
-
-        if (existingTeleportRequests.size() == 0) {
-            senderPlayerData.sendCommandError("cmd.tpcancel.error.no_exists");
+        var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
+            .getRequestToPlayer(PlayerData.access(targetPlayer));
+        if (existingTeleportRequest.isPresent()) {
+            senderPlayerData.sendCommandError(
+                "cmd.tpask.error.exists",
+                existingTeleportRequest.get().getTargetPlayer().getDisplayName());
             return 0;
         }
-    
-        List<Component> targetNames = existingTeleportRequests.stream()
-            .map(request -> {
-                ServerPlayer p = request.getTargetPlayer();
-                if (p != null) {
-                    return p.getDisplayName();
-                }
-                return Component.literal("Offline Player");
-            })
-            .collect(Collectors.toList());
 
-        var requestsCopy = existingTeleportRequests.stream().collect(Collectors.toList());
-        for (TeleportRequest request : requestsCopy) {
-            request.end(); 
-        }
+        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
         
-        existingTeleportRequests.clear();
+        if (!success) {
+            return 0;
+        }
 
-        senderPlayerData.sendMessage(
-            "cmd.tpcancel.feedback",
-            TextUtil.join(targetNames, Component.literal(", "))
+        targetPlayer.sendSystemMessage(
+            Component.translatable("cmd.tpask.receive", senderPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
+        );
+
+        String senderName = senderPlayer.getGameProfile().name();
+        
+        new ChatConfirmationPrompt(
+            targetPlayer,
+            "/tpaccept " + senderName,
+            "/tpdeny " + senderName,
+            Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
+                .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
+            Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
+                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+        ).send();
+
+        senderPlayer.sendSystemMessage(
+            Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
         );
 
         return Command.SINGLE_SUCCESS;
