@@ -15,9 +15,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 
-public class TeleportAskHereCommand implements Command<CommandSourceStack> {
+public class TeleportAskCommand implements Command<CommandSourceStack> {
 
-    public TeleportAskHereCommand() {}
+    public TeleportAskCommand() {}
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -36,15 +36,15 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
             return 0;
         }
 
-        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_HERE);
+        boolean success = tpMgr.startTpRequest(senderPlayer, targetPlayer, TeleportRequest.Type.TPA_TO);
 
         if (!success) {
             return 0;
         }
-        
+
         var targetPlayerEcText = ECText.access(targetPlayer);
         targetPlayerData.sendMessage(
-            "cmd.tpaskhere.receive",
+            "cmd.tpask.receive",
             senderPlayer.getDisplayName()
         );
 
@@ -57,8 +57,8 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
             targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
         ).send();
 
-        senderPlayerData.sendCommandFeedback("cmd.tpask.send", targetPlayer.getDisplayName());
+        senderPlayerData.sendMessage("cmd.tpask.send", targetPlayer.getDisplayName());
 
-        return SINGLE_SUCCESS;
+        return Command.SINGLE_SUCCESS;
     }
 }
