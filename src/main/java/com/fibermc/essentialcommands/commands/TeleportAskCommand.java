@@ -11,8 +11,10 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportAskCommand implements Command<CommandSourceStack> {
@@ -42,19 +44,21 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             return 0;
         }
 
-        var targetPlayerEcText = ECText.access(targetPlayer);
         targetPlayerData.sendMessage(
             "cmd.tpask.receive",
             senderPlayer.getDisplayName()
         );
 
         String senderName = senderPlayer.getGameProfile().name();
+        
         new ChatConfirmationPrompt(
             targetPlayer,
             "/tpaccept " + senderName,
             "/tpdeny " + senderName,
-            targetPlayerEcText.accent("[" + ECText.getInstance().getString("generic.accept") + "]"),
-            targetPlayerEcText.error("[" + ECText.getInstance().getString("generic.deny") + "]")
+            Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
+                .withStyle(ChatFormatting.GREEN),
+            Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
+                .withStyle(ChatFormatting.RED)
         ).send();
 
         senderPlayerData.sendMessage(
