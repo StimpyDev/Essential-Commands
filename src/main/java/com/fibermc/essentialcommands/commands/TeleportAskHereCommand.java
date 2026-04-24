@@ -27,10 +27,9 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
         ServerPlayer targetPlayer = EntityArgument.getPlayer(context, "target_player");
         var senderPlayerData = PlayerData.access(senderPlayer);
-        var targetPlayerData = PlayerData.access(targetPlayer);
-        
+
         var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
-            .getRequestToPlayer(targetPlayerData);
+            .getRequestToPlayer(PlayerData.access(targetPlayer));
         if (existingTeleportRequest.isPresent()) {
             senderPlayerData.sendCommandError(
                 "cmd.tpask.error.exists",
@@ -50,7 +49,6 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         );
 
         String senderName = senderPlayer.getGameProfile().name();
-        
         new ChatConfirmationPrompt(
             targetPlayer,
             "/tpaccept " + senderName,
@@ -61,7 +59,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
         ).send();
 
-        targetPlayer.sendSystemMessage(
+        senderPlayer.sendSystemMessage(
             Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
                 .withStyle(ChatFormatting.GREEN)
         );
