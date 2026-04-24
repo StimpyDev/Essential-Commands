@@ -14,6 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 
 import dev.jpcode.eccore.util.TextUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,27 +28,27 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
         var senderPlayerData = PlayerData.access(senderPlayer);
 
-        var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
+        Collection<TeleportRequest> requests = senderPlayerData.getSentTeleportRequests().values();
 
-        if (existingTeleportRequests.isEmpty()) {
+        if (requests.isEmpty()) {
             senderPlayerData.sendCommandError("cmd.tpcancel.error.no_exists");
             return 0;
         }
     
-        List<Component> targetNames = existingTeleportRequests.stream()
+        List<Component> targetNames = requests.stream()
             .map(request -> {
                 ServerPlayer p = request.getTargetPlayer();
                 return p != null ? p.getDisplayName() : Component.literal("Offline Player");
             })
             .collect(Collectors.toList());
 
-        var requestsCopy = List.copyOf(existingTeleportRequests);
+        var requestsCopy = new ArrayList<>(requests);
         for (TeleportRequest request : requestsCopy) {
             request.end(); 
         }
         
-        existingTeleportRequests.clear();
-        
+        senderPlayerData.getSentTeleportRequests().clear();
+
         senderPlayer.sendSystemMessage(
             Component.translatable(
                 "cmd.tpcancel.feedback",
