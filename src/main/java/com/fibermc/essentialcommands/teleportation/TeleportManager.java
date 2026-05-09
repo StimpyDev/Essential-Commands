@@ -49,59 +49,48 @@ public final class TeleportManager {
     }
 
     public void tick(MinecraftServer server) {
-        if (activeTeleportRequests.size() == 0 && queuedTeleportMap.size() == 0 && playersOnTeleportCooldown.size() == 0) {
+        if (activeTeleportRequests.isEmpty() && queuedTeleportMap.isEmpty() && playersOnTeleportCooldown.isEmpty()) {
             return;
         }
 
-        if (activeTeleportRequests.size() > 0) {
-            Iterator<TeleportRequest> requestIter = activeTeleportRequests.iterator();
-            while (requestIter.hasNext()) {
-                TeleportRequest request = requestIter.next();
+        if (!activeTeleportRequests.isEmpty()) {
+            activeTeleportRequests.removeIf(request -> {
                 request.incrementAgeTicks();
-
                 if (request.getAgeTicks() > CONFIG.TELEPORT_REQUEST_DURATION_TICKS) {
                     request.end();
                     request.getSenderPlayerData().sendMessage("teleport.request.expired.sender", request.getTargetPlayer().getDisplayName());
                     request.getTargetPlayerData().sendMessage("teleport.request.expired.receiver", request.getSenderPlayer().getDisplayName());
-                    requestIter.remove();
-                    continue;
+                    return true;
                 }
-                
-                if (request.isEnded()) {
-                    requestIter.remove();
-                }
-            }
+                return request.isEnded();
+            });
         }
 
-        if (playersOnTeleportCooldown.size() > 0) {
-            ListIterator<PlayerData> tpCooldownIterator = playersOnTeleportCooldown.listIterator();
-            while (tpCooldownIterator.hasNext()) {
-                PlayerData playerData = tpCooldownIterator.next();
+        if (!playersOnTeleportCooldown.isEmpty()) {
+            playersOnTeleportCooldown.removeIf(playerData -> {
                 playerData.tickTpCooldown();
-                if (playerData.getTpCooldown() < 0) {
-                    tpCooldownIterator.remove();
-                }
-            }
+                return playerData.getTpCooldown() < 0;
+            });
         }
 
-        if (queuedTeleportMap.size() > 0) {
-            var shouldInterruptTeleportOnMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE;
-            var maxMoveBeforeInterrupt = CONFIG.TELEPORT_INTERRUPT_ON_MOVE_AMOUNT;
-            Iterator<Map.Entry<UUID, QueuedTeleport>> tpQueueIter = queuedTeleportMap.entrySet().iterator();
-            
-            while (tpQueueIter.hasNext()) {
-                Map.Entry<UUID, QueuedTeleport> entry = tpQueueIter.next();
+        if (!queuedTeleportMap.isEmpty()) {
+            var shouldInterruptOnMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE;
+            var maxMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE_AMOUNT;
+
+            queuedTeleportMap.entrySet().removeIf(entry -> {
                 QueuedTeleport queuedTeleport = entry.getValue();
                 queuedTeleport.tick(server);
 
                 var playerData = queuedTeleport.getPlayerData();
                 var player = playerData.getPlayer();
-                var playerAccess = (ServerPlayerEntityAccess) player;
                 
+                if (player == null || player.isRemoved()) return true;
+
                 long ticksRemaining = queuedTeleport.getTicksRemaining();
                 
                 if (ticksRemaining > 0 && ticksRemaining % 20 == 0) {
                     int secondsRemaining = (int) (ticksRemaining / 20);
+                    var playerAccess = (ServerPlayerEntityAccess) player;
                     var accentStyle = playerAccess.ec$getProfile().getStyle(TextFormatType.Accent);
                     
                     playerData.sendMessage(
@@ -111,22 +100,22 @@ public final class TeleportManager {
                     );
                 }
 
-                if (shouldInterruptTeleportOnMove
-                    && playerData.hasMovedThisTick()
-                    && player.position().distanceTo(queuedTeleport.initialPosition) > maxMoveBeforeInterrupt
-                    && !PlayerTeleporter.playerHasTpRulesBypass(player, ECPerms.Registry.bypass_teleport_interrupt_on_move)
-                ) {
-                    playerData.sendError("teleport.interrupted.moved");
-                    tpQueueIter.remove();
-                    continue;
+                if (shouldInterruptOnMove && playerData.hasMovedThisTick()) {
+                    if (player.position().distanceTo(queuedTeleport.initialPosition) > maxMove) {
+                        if (!PlayerTeleporter.playerHasTpRulesBypass(player, ECPerms.Registry.bypass_teleport_interrupt_on_move)) {
+                            playerData.sendError("teleport.interrupted.moved");
+                            return true;
+                        }
+                    }
                 }
 
-                // Voer teleportatie uit
                 if (ticksRemaining < 0) {
-                    tpQueueIter.remove();
                     PlayerTeleporter.teleport(queuedTeleport);
+                    return true;
                 }
-            }
+
+                return false;
+            });
         }
     }
 
@@ -174,10 +163,11 @@ public final class TeleportManager {
 
     void queueTeleport(QueuedTeleport queuedTeleport) {
         var playerData = queuedTeleport.getPlayerData();
-        var playerAccess = ((ServerPlayerEntityAccess) playerData.getPlayer());
+        var playerEntity = playerData.getPlayer();
+        var playerAccess = ((ServerPlayerEntityAccess) playerEntity);
 
         QueuedTeleport prevValue = queuedTeleportMap.put(
-            playerData.getPlayer().getUUID(),
+            playerEntity.getUUID(),
             queuedTeleport
         );
         
