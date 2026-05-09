@@ -83,11 +83,11 @@ public final class TeleportManager {
                 if (remaining <= 0) {
                     ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
                     if (player != null) {
-                        PlayerData.access(player).sendMessage(
-                            Component.translatable("cmd.fly.feedback.ready")
-                                .withStyle(ChatFormatting.GREEN)
-                        );
-                    }
+    player.sendSystemMessage(
+        Component.translatable("cmd.fly.feedback.ready")
+            .withStyle(ChatFormatting.GREEN)
+    );
+}
                     return true;
                 }
                 entry.setValue(remaining);
