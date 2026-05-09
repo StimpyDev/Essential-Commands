@@ -3,6 +3,8 @@
   "cmd.back.location_name": "vorige locatie",
   "cmd.enderchest.feedback": "Ender Chest is geopend.",
   "cmd.enderchest.container_ui_name": "EC Ender Chest",
+  "cmd.fly.error.combat": "Fly uitgeschakeld! Je bent aangevallen door een speler.",
+  "cmd.fly.feedback.ready": "De fly-cooldown is verlopen. Je kunt weer vliegen!",
   "cmd.fly.feedback": "Fly ${0} voor ${1}.",
   "cmd.fly.speed.feedback.update": "Je vliegsnelheid is aangepast van ${0} naar ${1}.",
   "cmd.fly.speed.feedback.update.other": "Vliegsnelheid van ${0} is aangepast van ${1} naar ${2} voor ${3}.",
