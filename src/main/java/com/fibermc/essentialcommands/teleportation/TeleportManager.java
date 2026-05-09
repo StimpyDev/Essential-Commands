@@ -5,12 +5,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.fibermc.essentialcommands.ECPerms;
 import com.fibermc.essentialcommands.access.ServerPlayerEntityAccess;
+import com.fibermc.essentialcommands.commands.FlyCommand;
 import com.fibermc.essentialcommands.events.PlayerDamageCallback;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.playerdata.PlayerDataManager;
 import com.fibermc.essentialcommands.text.TextFormatType;
 import com.fibermc.essentialcommands.types.MinecraftLocation;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -25,6 +27,7 @@ public final class TeleportManager {
     private final List<TeleportRequest> activeTeleportRequests;
     private final List<PlayerData> playersOnTeleportCooldown;
     private final Map<UUID, QueuedTeleport> queuedTeleportMap;
+    private final Map<UUID, Integer> flyCooldownMap;
 
     private static TeleportManager instance;
 
@@ -33,6 +36,7 @@ public final class TeleportManager {
         activeTeleportRequests = new ArrayList<>();
         playersOnTeleportCooldown = new ArrayList<>();
         queuedTeleportMap = new ConcurrentHashMap<>();
+        flyCooldownMap = new ConcurrentHashMap<>();
     }
 
     public static TeleportManager getInstance() {
@@ -49,7 +53,7 @@ public final class TeleportManager {
     }
 
     public void tick(MinecraftServer server) {
-        if (activeTeleportRequests.isEmpty() && queuedTeleportMap.isEmpty() && playersOnTeleportCooldown.isEmpty()) {
+        if (activeTeleportRequests.isEmpty() && queuedTeleportMap.isEmpty() && playersOnTeleportCooldown.isEmpty() && flyCooldownMap.isEmpty()) {
             return;
         }
 
@@ -70,6 +74,24 @@ public final class TeleportManager {
             playersOnTeleportCooldown.removeIf(playerData -> {
                 playerData.tickTpCooldown();
                 return playerData.getTpCooldown() < 0;
+            });
+        }
+
+        if (!flyCooldownMap.isEmpty()) {
+            flyCooldownMap.entrySet().removeIf(entry -> {
+                int remaining = entry.getValue() - 1;
+                if (remaining <= 0) {
+                    ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                    if (player != null) {
+                        PlayerData.access(player).sendMessage(
+                            Component.translatable("cmd.fly.feedback.ready")
+                                .withStyle(ChatFormatting.GREEN)
+                        );
+                    }
+                    return true;
+                }
+                entry.setValue(remaining);
+                return false;
             });
         }
 
@@ -120,9 +142,19 @@ public final class TeleportManager {
     }
 
     public void onPlayerDamaged(ServerPlayer playerEntity, DamageSource damageSource) {
-        if (!CONFIG.TELEPORT_INTERRUPT_ON_DAMAGED) {
-            return;
+        if (playerEntity.getAbilities().mayfly) {
+            if (damageSource.getEntity() instanceof ServerPlayer) {
+                FlyCommand.disableFly(playerEntity);
+                
+                var playerData = PlayerData.access(playerEntity);
+                playerData.sendError("cmd.fly.error.combat");
+                
+                flyCooldownMap.put(playerEntity.getUUID(), 300);
+            }
         }
+
+        if (!CONFIG.TELEPORT_INTERRUPT_ON_DAMAGED) return;
+
         var playerAccess = ((ServerPlayerEntityAccess) playerEntity);
         if (playerAccess.ec$getQueuedTeleport() != null
             && !PlayerTeleporter.playerHasTpRulesBypass(playerEntity, ECPerms.Registry.bypass_teleport_interrupt_on_damaged)
