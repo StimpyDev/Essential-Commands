@@ -24,6 +24,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class HomeCommand implements Command<CommandSourceStack> {
 
@@ -41,8 +42,6 @@ public class HomeCommand implements Command<CommandSourceStack> {
         return ((ServerPlayerEntityAccess) context.getSource().getPlayerOrException()).ec$getPlayerData();
     }
 
-    // TODO: Ideally the styling here should come from a context, intead of from the player we're
-    //  accessing, but I don't think it matters, practically speaking, for now.
     public static String getSoleHomeName(PlayerData playerData) throws CommandSyntaxException {
         Set<String> homeNames = playerData.getHomeNames();
         var ecText = ECText.access(playerData.getPlayer());
@@ -71,9 +70,9 @@ public class HomeCommand implements Command<CommandSourceStack> {
     }
 
     public static int exec(PlayerData senderPlayerData, PlayerData targetPlayerData, String homeName) throws CommandSyntaxException {
-        //Get home location
         MinecraftLocation loc = targetPlayerData.getHomeLocation(homeName);
         var ecText = ECText.access(senderPlayerData.getPlayer());
+        
         if (loc == null) {
             Message msg = ecText.getText(
                 "cmd.home.tp.error.not_found",
@@ -82,31 +81,25 @@ public class HomeCommand implements Command<CommandSourceStack> {
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
         }
 
-        // Teleport & chat message
-        var homeNameText = ecText.getText(
+        MutableComponent homeNameText = (MutableComponent) ecText.getText(
             "cmd.home.location_name",
             TextFormatType.Default,
             ecText.accent(homeName));
 
+
         PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText);
+        
         return SINGLE_SUCCESS;
     }
 
     public static class Suggestion {
-        //Brigader Suggestions
         public static final SuggestionProvider<CommandSourceStack> LIST_SUGGESTION_PROVIDER
             = ListSuggestion.ofContext(Suggestion::getSuggestionsList);
 
-        /**
-         * Gets a list of suggested strings to be used with Brigader
-         */
         public static List<String> getSuggestionsList(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
             return new ArrayList<>(HomeCommand.getTargetPlayerData(context).getHomeNames());
         }
 
-        /**
-         * Gets a set of suggestion entries to be used with ListCommandFactory
-         */
         public static Set<Map.Entry<String, NamedMinecraftLocation>> getSuggestionEntries(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
             return HomeCommand.getTargetPlayerData(context).getHomeEntries();
         }
