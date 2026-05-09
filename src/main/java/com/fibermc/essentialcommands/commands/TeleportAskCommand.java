@@ -15,6 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportAskCommand implements Command<CommandSourceStack> {
@@ -44,9 +45,12 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             return 0;
         }
 
+        MutableComponent senderNameFormatted = senderPlayer.getDisplayName().copy().withStyle(ChatFormatting.WHITE);
+        
         targetPlayer.sendSystemMessage(
-            Component.translatable("cmd.tpask.receive", senderPlayer.getDisplayName())
+            Component.translatable("cmd.tpask.receive", senderNameFormatted)
                 .withStyle(ChatFormatting.GREEN)
+                .withStyle(style -> style.withBold(false))
         );
 
         String senderName = senderPlayer.getGameProfile().name();
@@ -56,14 +60,19 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
             "/tpaccept " + senderName,
             "/tpdeny " + senderName,
             Component.literal("[" + ECText.getInstance().getString("generic.accept") + "]")
-                .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
+                .withStyle(ChatFormatting.GREEN)
+                .withStyle(style -> style.withBold(true)),
             Component.literal("[" + ECText.getInstance().getString("generic.deny") + "]")
-                .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                .withStyle(ChatFormatting.RED)
+                .withStyle(style -> style.withBold(true))
         ).send();
 
+        MutableComponent targetNameFormatted = targetPlayer.getDisplayName().copy().withStyle(ChatFormatting.WHITE);
+
         senderPlayer.sendSystemMessage(
-            Component.translatable("cmd.tpask.send", targetPlayer.getDisplayName())
+            Component.translatable("cmd.tpask.send", targetNameFormatted)
                 .withStyle(ChatFormatting.GREEN)
+                .withStyle(style -> style.withBold(false))
         );
 
         return Command.SINGLE_SUCCESS;
