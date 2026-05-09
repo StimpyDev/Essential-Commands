@@ -81,15 +81,16 @@ public final class EssentialCommandRegistry {
                 essentialCommandsRootNode.addChild(node);
             }
             : essentialCommandsRootNode::addChild;
-
-        if (CONFIG.ENABLE_TPA) {
-            registerNode.accept(Commands.literal("tpa")
-                .requires(ECPerms.require(ECPerms.Registry.tpa, 0))
-                .then(CommandUtil.targetPlayerArgument()
-                    .executes(new TeleportAskCommand()))
-                .build());
-
-            registerNode.accept(Commands.literal("tpcancel")
+        
+if (CONFIG.ENABLE_TPA) {
+    registerNode.accept(Commands.literal("tpa")
+        .requires(ECPerms.require(ECPerms.Registry.tpa, 0))
+        .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
+            .executes(new TeleportAskCommand()))
+        .build());
+}
+        
+registerNode.accept(Commands.literal("tpcancel")
                 .requires(ECPerms.require(ECPerms.Registry.tpa, 0))
                 .executes(new TeleportCancelCommand())
                 .build());
@@ -97,25 +98,22 @@ public final class EssentialCommandRegistry {
             registerNode.accept(Commands.literal("tpaccept")
                 .requires(ECPerms.require(ECPerms.Registry.tpaccept, 0))
                 .executes(new TeleportAcceptCommand()::runDefault)
-                .then(CommandUtil.targetPlayerArgument()
-                    .suggests(TeleportResponseSuggestion.STRING_SUGGESTIONS_PROVIDER)
+                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
                     .executes(new TeleportAcceptCommand()))
                 .build());
 
             registerNode.accept(Commands.literal("tpdeny")
                 .requires(ECPerms.require(ECPerms.Registry.tpdeny, 0))
                 .executes(new TeleportDenyCommand()::runDefault)
-                .then(CommandUtil.targetPlayerArgument()
-                    .suggests(TeleportResponseSuggestion.STRING_SUGGESTIONS_PROVIDER)
+                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
                     .executes(new TeleportDenyCommand()))
                 .build());
 
             registerNode.accept(Commands.literal("tpahere")
                 .requires(ECPerms.require(ECPerms.Registry.tpahere, 0))
-                .then(CommandUtil.targetPlayerArgument()
+                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
                     .executes(new TeleportAskHereCommand()))
                 .build());
-        }
 
         if (CONFIG.ENABLE_HOME) {
             LiteralArgumentBuilder<CommandSourceStack> homeBuilder = Commands.literal("home");
