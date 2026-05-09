@@ -45,8 +45,9 @@ public class FlyCommand implements Command<CommandSourceStack> {
 
     public static void disableFly(ServerPlayer target) {
         try {
-            if (target.server != null) {
-                exec(target.server.createCommandSourceStack(), target, false);
+            var server = target.serverLevel().getServer();
+            if (server != null) {
+                exec(server.createCommandSourceStack(), target, false);
             }
         } catch (CommandSyntaxException | NullPointerException ignored) {
         }
