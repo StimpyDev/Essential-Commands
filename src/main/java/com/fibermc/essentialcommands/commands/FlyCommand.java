@@ -6,6 +6,7 @@ import com.fibermc.essentialcommands.ECAbilitySources;
 import com.fibermc.essentialcommands.access.ServerPlayerEntityAccess;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.text.ECText;
+import com.fibermc.essentialcommands.text.TextFormatType;
 import io.github.ladysnake.pal.VanillaAbilities;
 
 import com.mojang.brigadier.Command;
@@ -29,26 +30,28 @@ public class FlyCommand implements Command<CommandSourceStack> {
 
         boolean shouldEnableFly;
         try {
-            // Prefer explicitly specified flight state from commands args...
             shouldEnableFly = BoolArgumentType.getBool(context, "flight_enabled");
         } catch (IllegalArgumentException e) {
             try {
-                // Fall back to toggling the current PAL flight state granted by EC
                 shouldEnableFly = !VanillaAbilities.ALLOW_FLYING
                     .getTracker(targetPlayer).isGrantedBy(ECAbilitySources.FLY_COMMAND);
             } catch (NoClassDefFoundError ign) {
-                // If PAL is not found, fall back to toggling the current vanilla flight state.
                 shouldEnableFly = !targetPlayer.getAbilities().mayfly;
             }
         }
 
         exec(source, targetPlayer, shouldEnableFly);
-        return 0;
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static void disableFly(ServerPlayer target) {
+        try {
+            exec(target.getServer().createCommandSourceStack(), target, false);
+        } catch (CommandSyntaxException | NullPointerException ignored) {}
     }
 
     public static void exec(CommandSourceStack source, ServerPlayer target, boolean shouldEnableFly) throws CommandSyntaxException {
         Abilities playerAbilities = target.getAbilities();
-
         PlayerData playerData = ((ServerPlayerEntityAccess) target).ec$getPlayerData();
 
         try {
@@ -62,20 +65,21 @@ public class FlyCommand implements Command<CommandSourceStack> {
 
         target.onUpdateAbilities();
 
-        // Label boolean values in suggestions, or switch to single state value (present or it's not)
-
-        var senderPlayer = source.getPlayerOrException();
-        var senderPlayerData = PlayerData.access(senderPlayer);
+        var senderPlayer = source.getEntity() instanceof ServerPlayer sp ? sp : null;
         var ecTextTarget = ECText.access(target);
+        
         String enabledString = ecTextTarget.getString(shouldEnableFly ? "generic.enabled" : "generic.disabled");
 
-        if (!Objects.equals(senderPlayer, target)) {
+        if (senderPlayer != null && !Objects.equals(senderPlayer, target)) {
+            var senderPlayerData = PlayerData.access(senderPlayer);
             ECText ecTextSender = ECText.access(senderPlayer);
             senderPlayerData.sendCommandFeedback(
                 "cmd.fly.feedback",
                 ecTextSender.accent(enabledString),
-                target.getDisplayName());
+                target.getDisplayName()
+            );
         }
+
         playerData.sendCommandFeedback(
             "cmd.fly.feedback",
             ecTextTarget.accent(enabledString),
