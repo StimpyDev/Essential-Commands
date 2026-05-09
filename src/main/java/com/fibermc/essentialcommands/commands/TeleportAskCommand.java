@@ -18,6 +18,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
+
 public class TeleportAskCommand implements Command<CommandSourceStack> {
 
     public TeleportAskCommand() {}
@@ -32,6 +34,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
 
         var existingTeleportRequest = senderPlayerData.getSentTeleportRequests()
             .getRequestToPlayer(targetPlayerData);
+            
         if (existingTeleportRequest.isPresent()) {
             senderPlayerData.sendCommandError(
                 "cmd.tpask.error.exists",
@@ -48,7 +51,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
         MutableComponent senderNameFormatted = senderPlayer.getDisplayName().copy().withStyle(ChatFormatting.WHITE);
         
         targetPlayer.sendSystemMessage(
-            Component.translatable("cmd.tpask.receive", senderNameFormatted)
+            ECText.getInstance().getText("cmd.tpask.receive", senderNameFormatted)
                 .withStyle(ChatFormatting.GREEN)
                 .withStyle(style -> style.withBold(false))
         );
@@ -70,7 +73,7 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
         MutableComponent targetNameFormatted = targetPlayer.getDisplayName().copy().withStyle(ChatFormatting.WHITE);
 
         senderPlayer.sendSystemMessage(
-            Component.translatable("cmd.tpask.send", targetNameFormatted)
+            ECText.getInstance().getText("cmd.tpask.send", targetNameFormatted)
                 .withStyle(ChatFormatting.GREEN)
                 .withStyle(style -> style.withBold(false))
         );
