@@ -4,10 +4,12 @@ import java.util.Optional;
 
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
+import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,7 +20,10 @@ public class TeleportDenyCommand extends TeleportResponseCommand {
         var respondingPlayerData = PlayerData.access(respondingPlayer);
 
         if (requesterPlayer == null) {
-            respondingPlayerData.sendError("cmd.tpa_reply.error.no_request_from_target");
+            respondingPlayer.sendSystemMessage(
+                ECText.getInstance().getText("cmd.tpa_reply.error.no_request_from_target")
+                    .withStyle(ChatFormatting.RED)
+            );
             return -1;
         }
 
@@ -28,18 +33,20 @@ public class TeleportDenyCommand extends TeleportResponseCommand {
             .getRequestToPlayer(respondingPlayerData);
 
         if (teleportRequest.isEmpty()) {
-            respondingPlayerData.sendCommandError("cmd.tpa_reply.error.no_request_from_target");
+            respondingPlayer.sendSystemMessage(
+                ECText.getInstance().getText("cmd.tpa_reply.error.no_request_from_target")
+                    .withStyle(ChatFormatting.RED)
+            );
             return -1;
         }
-
-        requesterPlayerData.sendMessage(
-            "cmd.tpdeny.feedback",
-            respondingPlayer.getDisplayName()
+        requesterPlayer.sendSystemMessage(
+            ECText.getInstance().getText("cmd.tpdeny.feedback", respondingPlayer.getDisplayName())
+                .withStyle(ChatFormatting.RED)
         );
         
-        respondingPlayerData.sendMessage(
-            "cmd.tpdeny.feedback",
-            requesterPlayer.getDisplayName()
+        respondingPlayer.sendSystemMessage(
+            ECText.getInstance().getText("cmd.tpdeny.success", requesterPlayer.getDisplayName())
+                .withStyle(ChatFormatting.GREEN)
         );
 
         teleportRequest.get().end();
