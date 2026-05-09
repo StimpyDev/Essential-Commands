@@ -2,6 +2,7 @@ package com.fibermc.essentialcommands.commands;
 
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
+import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -29,7 +30,10 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
         var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
 
         if (existingTeleportRequests.size() == 0) {
-            senderPlayerData.sendCommandError("cmd.tpcancel.error.no_exists");
+            senderPlayer.sendSystemMessage(
+                ECText.getInstance().getText("cmd.tpcancel.error.no_exists")
+                    .withStyle(ChatFormatting.RED)
+            );
             return 0;
         }
     
@@ -48,7 +52,7 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
         existingTeleportRequests.clear();
 
         senderPlayer.sendSystemMessage(
-            Component.translatable(
+            ECText.getInstance().getText(
                 "cmd.tpcancel.feedback",
                 TextUtil.join(targetNames, Component.literal(", "))
             ).withStyle(ChatFormatting.GREEN)
