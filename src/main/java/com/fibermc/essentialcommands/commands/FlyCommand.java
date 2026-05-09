@@ -43,9 +43,9 @@ public class FlyCommand implements Command<CommandSourceStack> {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static void disableFly(ServerPlayer target) {
+public static void disableFly(ServerPlayer target) {
     try {
-        var server = target.getServer();
+        var server = target.level().getServer();
         
         if (server != null) {
             exec(server.createCommandSourceStack(), target, false);
