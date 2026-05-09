@@ -6,7 +6,6 @@ import com.fibermc.essentialcommands.ECAbilitySources;
 import com.fibermc.essentialcommands.access.ServerPlayerEntityAccess;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.text.ECText;
-import com.fibermc.essentialcommands.text.TextFormatType;
 import io.github.ladysnake.pal.VanillaAbilities;
 
 import com.mojang.brigadier.Command;
@@ -46,8 +45,11 @@ public class FlyCommand implements Command<CommandSourceStack> {
 
     public static void disableFly(ServerPlayer target) {
         try {
-            exec(target.getServer().createCommandSourceStack(), target, false);
-        } catch (CommandSyntaxException | NullPointerException ignored) {}
+            if (target.server != null) {
+                exec(target.server.createCommandSourceStack(), target, false);
+            }
+        } catch (CommandSyntaxException | NullPointerException ignored) {
+        }
     }
 
     public static void exec(CommandSourceStack source, ServerPlayer target, boolean shouldEnableFly) throws CommandSyntaxException {
