@@ -44,11 +44,12 @@
   "cmd.tpa_reply.error.no_request_from_target": "Er is geen teleportatieverzoek openstaand van de opgegeven speler.",
   "cmd.tpask.receive": "${0} wil naar jou teleporteren. Gebruik /tpaccept om te accepteren of /tpdeny om te weigeren.",
   "cmd.tpask.send": "TPA Verzoek naar ${0} is verzonden!",
+  "cmd.tpdeny.success": "Je hebt het TPA Verzoek van ${0} geweigerd."
   "cmd.tpask.error.exists": "TPA verzoek niet verzonden. Je hebt al een teleportatieverzoek openstaan naar ${0}.",
   "cmd.tpaskhere.receive": "${0} heeft gevraagd om naar jou toe te teleporteren.",
   "cmd.tpcancel.feedback": "TPA Verzoek geannuleerd.",
   "cmd.tpcancel.error.no_exists": "Er is geen teleportatieverzoek dat momenteel kan worden geannuleerd.",
-  "cmd.tpdeny.feedback": "TPA Verzoek geweigerd.",
+  "cmd.tpdeny.feedback": "Je TPA Verzoek is geweigerd door ${0}.",
   "cmd.warp.delete.feedback": "Warp '${0}' is verwijderd.",
   "cmd.warp.delete.error": "Warp '${0}' kon niet worden verwijderd. (Controleer de spelling.)",
   "cmd.warp.set.feedback": "Warp '${0}' is ingesteld.",
