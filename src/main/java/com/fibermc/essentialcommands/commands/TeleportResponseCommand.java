@@ -1,28 +1,38 @@
 package com.fibermc.essentialcommands.commands;
 
-import java.util.LinkedHashMap;
-import java.util.UUID;
-
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ECText;
 import com.fibermc.essentialcommands.text.TextFormatType;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType; // TOEGEVOEGD
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component; // TOEGEVOEGD
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.LinkedHashMap;
+import java.util.UUID;
 
 public abstract class TeleportResponseCommand implements Command<CommandSourceStack> {
 
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        String targetName = StringArgumentType.getString(context, "target_player");
+        
+        ServerPlayer targetPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(targetName);
+
+        if (targetPlayer == null) {
+            context.getSource().sendFailure(Component.literal("Speler '" + targetName + "' is niet online."));
+            return 0;
+        }
+
         return exec(
             context,
             context.getSource().getPlayerOrException(),
-            EntityArgument.getPlayer(context, "target_player")
+            targetPlayer
         );
     }
 
