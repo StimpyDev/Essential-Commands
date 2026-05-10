@@ -8,17 +8,15 @@ import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
 import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.List;
 
 public class TeleportAskCommand implements Command<CommandSourceStack> {
 
@@ -28,7 +26,17 @@ public class TeleportAskCommand implements Command<CommandSourceStack> {
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         TeleportManager tpMgr = ManagerLocator.getInstance().getTpManager();
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
-        ServerPlayer targetPlayer = EntityArgument.getPlayer(context, "target_player");
+        
+        String targetName = StringArgumentType.getString(context, "target_player");
+        ServerPlayer targetPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(targetName);
+
+        if (targetPlayer == null) {
+            throw CommandUtil.createSimpleException(
+                Component.literal("De speler '" + targetName + "' is niet online of bestaat niet.")
+                    .withStyle(ChatFormatting.RED)
+            );
+        }
+
         var senderPlayerData = PlayerData.access(senderPlayer);
         var targetPlayerData = PlayerData.access(targetPlayer);
 
