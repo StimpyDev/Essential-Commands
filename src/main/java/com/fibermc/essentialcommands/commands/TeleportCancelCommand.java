@@ -30,7 +30,7 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
 
         var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
 
-        if (existingTeleportRequests.isEmpty()) {
+        if (existingTeleportRequests.size() == 0) {
             senderPlayer.sendSystemMessage(
                 ECText.getInstance().getText("cmd.tpcancel.error.no_exists")
                     .withStyle(ChatFormatting.RED)
