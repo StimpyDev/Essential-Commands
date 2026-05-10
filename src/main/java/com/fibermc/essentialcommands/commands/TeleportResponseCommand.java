@@ -25,7 +25,7 @@ public abstract class TeleportResponseCommand implements Command<CommandSourceSt
         ServerPlayer targetPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(targetName);
 
         if (targetPlayer == null) {
-            context.getSource().sendFailure(Component.literal("Speler '" + targetName + "' is niet online."));
+            context.getSource().sendFailure(Component.literal("De speler '" + targetName + "' is niet online of bestaat niet."));
             return 0;
         }
 
