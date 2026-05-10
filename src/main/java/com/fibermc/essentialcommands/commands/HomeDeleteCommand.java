@@ -44,14 +44,14 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
                     .withBold(true)
                     .withUnderlined(true)
                     .withItalic(false)
-                    .withClickEvent(new net.minecraft.network.chat.ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND, confirmCommand))
+                    .withClickEvent(ClickEvent.runCommand(confirmCommand))
                 ));
 
         senderPlayer.sendSystemMessage(message);
 
         return SINGLE_SUCCESS;
     }
-    
+
     public int runConfirm(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
         PlayerData senderPlayerData = ((ServerPlayerEntityAccess) senderPlayer).ec$getPlayerData();
