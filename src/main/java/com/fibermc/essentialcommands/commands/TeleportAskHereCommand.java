@@ -31,7 +31,7 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         ServerPlayer targetPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(targetPlayerName);
         
         if (targetPlayer == null) {
-            context.getSource().sendFailure(Component.literal("Speler '" + targetPlayerName + "' is niet online.")
+            context.getSource().sendFailure(Component.literal("De speler '" + targetPlayerName + "' is niet online of bestaat niet.")
                 .withStyle(ChatFormatting.RED));
             return 0;
         }
