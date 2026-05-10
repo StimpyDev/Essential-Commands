@@ -22,6 +22,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -77,15 +78,18 @@ public class HomeCommand implements Command<CommandSourceStack> {
             Message msg = ecText.getText(
                 "cmd.home.tp.error.not_found",
                 TextFormatType.Error,
-                Component.literal(homeName));
+                Component.literal("'" + homeName + "'").withStyle(ChatFormatting.YELLOW));
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
+        }
+        if (senderPlayerData.isInCombat()) {
+            throw CommandUtil.createSimpleException(
+                ecText.getText("teleport.error.in_combat", TextFormatType.Error));
         }
 
         MutableComponent homeNameText = (MutableComponent) ecText.getText(
             "cmd.home.location_name",
             TextFormatType.Default,
             ecText.accent(homeName));
-
 
         PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText);
         
