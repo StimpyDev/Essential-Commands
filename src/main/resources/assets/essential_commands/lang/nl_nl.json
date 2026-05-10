@@ -10,7 +10,7 @@
   "cmd.fly.speed.feedback.update.other": "Vliegsnelheid van ${0} is aangepast van ${1} naar ${2} voor ${3}.",
   "cmd.fly.speed.error.limit": "De maximale vliegsnelheid is ingesteld op ${0}.",
   "cmd.invuln.feedback": "Onkwetsbaarheid ${0} ingesteld voor ${1}.",
-  "cmd.home.tp.error.not_found": "Er kon geen huis met de naam '${0}' worden gevonden.",
+  "cmd.home.tp.error.not_found": "Er kon geen huis met de naam ${0} worden gevonden.",
   "cmd.home.tp.error.shortcut_none_exist": "Geen zijn geen huizen gevonden...",
   "cmd.home.tp.error.shortcut_more_than_one": "Er is meer dan één huis gevonden. Geef de naam op van het huis waarnaar je wilt teleporteren.",
   "cmd.home.location_name": "${0}",
