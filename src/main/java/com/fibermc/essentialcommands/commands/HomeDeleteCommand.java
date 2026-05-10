@@ -44,7 +44,7 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
                     .withBold(true)
                     .withUnderlined(true)
                     .withItalic(false)
-                    .withClickEvent(ClickEvent.runCommand(confirmCommand))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, confirmCommand) {})
                 ));
 
         senderPlayer.sendSystemMessage(message);
