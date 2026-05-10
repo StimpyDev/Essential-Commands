@@ -41,7 +41,7 @@ public class TeleportRequest {
         this.targetPlayer = ((ServerPlayerEntityAccess) targetPlayer).ec$getPlayerData();
     }
 
-    public void queue() {
+public void queue() {
         ServerPlayer teleportee;
         ServerPlayer tpDestination;
 
@@ -55,8 +55,12 @@ public class TeleportRequest {
             EssentialCommands.LOGGER.warn(String.format("Invalid teleport request type %s", type.toString()));
             return;
         }
-
-        PlayerTeleporter.requestTeleport(new QueuedPlayerTeleport(teleportee, tpDestination));
+        QueuedPlayerTeleport queuedTeleport = new QueuedPlayerTeleport(teleportee, tpDestination);
+        
+        PlayerData teleporteeData = ((ServerPlayerEntityAccess) teleportee).ec$getPlayerData();
+        teleporteeData.setPendingTeleport(queuedTeleport);
+        
+        PlayerTeleporter.requestTeleport(queuedTeleport);
     }
 
     public void incrementAgeTicks() {
