@@ -55,11 +55,13 @@ public void queue() {
             EssentialCommands.LOGGER.warn(String.format("Invalid teleport request type %s", type.toString()));
             return;
         }
+
         QueuedPlayerTeleport queuedTeleport = new QueuedPlayerTeleport(teleportee, tpDestination);
         
         PlayerData teleporteeData = ((ServerPlayerEntityAccess) teleportee).ec$getPlayerData();
-        teleporteeData.setPendingTeleport(queuedTeleport);
         
+        teleporteeData.setPendingTeleport(queuedTeleport);
+
         PlayerTeleporter.requestTeleport(queuedTeleport);
     }
 
