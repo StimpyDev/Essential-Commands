@@ -1,5 +1,8 @@
 package com.fibermc.essentialcommands.commands;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 import com.fibermc.essentialcommands.access.ServerPlayerEntityAccess;
 import com.fibermc.essentialcommands.playerdata.PlayerData;
 import com.fibermc.essentialcommands.text.ECText;
@@ -17,6 +20,9 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class HomeDeleteCommand implements Command<CommandSourceStack> {
 
+    private static final HashMap<UUID, Long> pendingDeletions = new HashMap<>();
+    private static final long TIMEOUT_MS = 30000;
+
     public HomeDeleteCommand() {}
 
     @Override
@@ -31,6 +37,8 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
             senderPlayerData.sendCommandError("cmd.home.delete.error", homeNameText);
             return 0;
         }
+
+        pendingDeletions.put(senderPlayer.getUUID(), System.currentTimeMillis());
 
         String confirmCommand = "/home delete_confirm " + homeName;
         var textAccess = ECText.access(senderPlayer);
@@ -49,11 +57,28 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
 
     public int runConfirm(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
+        UUID playerUuid = senderPlayer.getUUID();
         PlayerData senderPlayerData = ((ServerPlayerEntityAccess) senderPlayer).ec$getPlayerData();
         String homeName = StringArgumentType.getString(context, "home_name");
 
+        if (!pendingDeletions.containsKey(playerUuid)) {
+            senderPlayer.sendSystemMessage(Component.literal("Je moet eerst '/home delete " + homeName + "' typen.")
+                .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        long startTime = pendingDeletions.get(playerUuid);
+        if (System.currentTimeMillis() - startTime > TIMEOUT_MS) {
+            pendingDeletions.remove(playerUuid);
+            senderPlayer.sendSystemMessage(Component.literal("Bevestiging verlopen! Typ opnieuw /home delete " + homeName)
+                .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
         boolean wasSuccessful = senderPlayerData.removeHome(homeName);
         var homeNameText = ECText.access(senderPlayer).accent(homeName);
+
+        pendingDeletions.remove(playerUuid);
 
         if (wasSuccessful) {
             senderPlayerData.sendCommandFeedback("cmd.home.delete.feedback", homeNameText);
