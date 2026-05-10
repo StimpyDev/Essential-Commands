@@ -15,7 +15,7 @@
   "cmd.home.tp.error.shortcut_more_than_one": "Er is meer dan één huis gevonden. Geef de naam op van het huis waarnaar je wilt teleporteren.",
   "cmd.home.location_name": "${0}",
   "cmd.home.delete.feedback": "Home ${0} is nu definitief verwijderd.",
-  "cmd.home.delete.confirm_question": "Weet je zeker dat je home ${0} wilt verwijderen?"
+  "cmd.home.delete.confirm_question": "Weet je zeker dat je home ${0} wilt verwijderen?",
   "cmd.home.delete.error": "Home ${0} kon niet worden verwijderd.",
   "cmd.home.set.feedback": "${0} is ingesteld.",
   "cmd.home.set.error.limit": "Home ${0} kon niet worden ingesteld. Het limiet van ${1} huizen is bereikt.",
