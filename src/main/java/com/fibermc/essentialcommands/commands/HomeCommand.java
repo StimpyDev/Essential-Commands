@@ -1,6 +1,7 @@
 package com.fibermc.essentialcommands.commands;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 
 public class HomeCommand implements Command<CommandSourceStack> {
 
@@ -33,10 +35,8 @@ public class HomeCommand implements Command<CommandSourceStack> {
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        PlayerData senderPlayerData = ((ServerPlayerEntityAccess) context.getSource().getPlayerOrException()).ec$getPlayerData();
-        String homeName = StringArgumentType.getString(context, "home_name");
-
-        return exec(senderPlayerData, homeName);
+        PlayerData senderPlayerData = getTargetPlayerData(context);
+        return exec(senderPlayerData, StringArgumentType.getString(context, "home_name"));
     }
 
     private static PlayerData getTargetPlayerData(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -45,25 +45,22 @@ public class HomeCommand implements Command<CommandSourceStack> {
 
     public static String getSoleHomeName(PlayerData playerData) throws CommandSyntaxException {
         Set<String> homeNames = playerData.getHomeNames();
-        var ecText = ECText.access(playerData.getPlayer());
+        if (homeNames.isEmpty()) {
+            throw CommandUtil.createSimpleException(
+                ECText.access(playerData.getPlayer()).getText("cmd.home.tp.error.shortcut_none_exist", TextFormatType.Error));
+        }
+        
         if (homeNames.size() > 1) {
             throw CommandUtil.createSimpleException(
-                ecText.getText("cmd.home.tp.error.shortcut_more_than_one", TextFormatType.Error));
-        } else if (homeNames.isEmpty()) {
-            throw CommandUtil.createSimpleException(
-                ecText.getText("cmd.home.tp.error.shortcut_none_exist", TextFormatType.Error));
+                ECText.access(playerData.getPlayer()).getText("cmd.home.tp.error.shortcut_more_than_one", TextFormatType.Error));
         }
 
-        return homeNames.stream().findAny().get();
+        return homeNames.iterator().next(); // iterator().next() is sneller dan stream().findAny().get()
     }
 
     public int runDefault(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        PlayerData playerData = ((ServerPlayerEntityAccess) context.getSource().getPlayerOrException()).ec$getPlayerData();
-
-        return exec(
-            playerData,
-            getSoleHomeName(playerData)
-        );
+        PlayerData playerData = getTargetPlayerData(context);
+        return exec(playerData, getSoleHomeName(playerData));
     }
 
     private static int exec(PlayerData senderPlayerData, String homeName) throws CommandSyntaxException {
@@ -72,7 +69,8 @@ public class HomeCommand implements Command<CommandSourceStack> {
 
     public static int exec(PlayerData senderPlayerData, PlayerData targetPlayerData, String homeName) throws CommandSyntaxException {
         MinecraftLocation loc = targetPlayerData.getHomeLocation(homeName);
-        var ecText = ECText.access(senderPlayerData.getPlayer());
+        ServerPlayer player = senderPlayerData.getPlayer();
+        ECText ecText = ECText.access(player);
         
         if (loc == null) {
             Message msg = ecText.getText(
@@ -81,6 +79,7 @@ public class HomeCommand implements Command<CommandSourceStack> {
                 Component.literal("'" + homeName + "'").withStyle(ChatFormatting.YELLOW));
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
         }
+
         if (senderPlayerData.isInCombat()) {
             throw CommandUtil.createSimpleException(
                 ecText.getText("teleport.error.in_combat", TextFormatType.Error));
