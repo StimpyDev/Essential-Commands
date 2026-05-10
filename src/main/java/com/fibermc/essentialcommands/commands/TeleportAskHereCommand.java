@@ -6,14 +6,14 @@ import com.fibermc.essentialcommands.teleportation.TeleportManager;
 import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ChatConfirmationPrompt;
 import com.fibermc.essentialcommands.text.ECText;
-import com.mojang.brigadier.arguments.StringArgumentType;
+
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +29,18 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
         
         String targetPlayerName = StringArgumentType.getString(context, "target_player");
         ServerPlayer targetPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(targetPlayerName);
+        
+        if (targetPlayer == null) {
+            context.getSource().sendFailure(Component.literal("Speler '" + targetPlayerName + "' is niet online.")
+                .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        if (senderPlayer.equals(targetPlayer)) {
+            context.getSource().sendFailure(Component.literal("Je kunt geen verzoek naar jezelf sturen!")
+                .withStyle(ChatFormatting.RED));
+            return 0;
+        }
 
         var senderPlayerData = PlayerData.access(senderPlayer);
 
