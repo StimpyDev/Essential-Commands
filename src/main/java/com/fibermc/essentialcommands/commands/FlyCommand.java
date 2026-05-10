@@ -43,16 +43,15 @@ public class FlyCommand implements Command<CommandSourceStack> {
         return Command.SINGLE_SUCCESS;
     }
 
-public static void disableFly(ServerPlayer target) {
-    try {
-        var server = target.level().getServer();
-        
-        if (server != null) {
-            exec(server.createCommandSourceStack(), target, false);
+    public static void disableFly(ServerPlayer target) {
+        try {
+            var server = target.level().getServer();
+            if (server != null) {
+                exec(server.createCommandSourceStack(), target, false);
+            }
+        } catch (CommandSyntaxException | NullPointerException ignored) {
         }
-    } catch (CommandSyntaxException | NullPointerException ignored) {
     }
-}
 
     public static void exec(CommandSourceStack source, ServerPlayer target, boolean shouldEnableFly) throws CommandSyntaxException {
         Abilities playerAbilities = target.getAbilities();
