@@ -23,7 +23,6 @@ public class TeleportAskHereCommand implements Command<CommandSourceStack> {
     public TeleportAskHereCommand() {}
 
     @Override
-    @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         TeleportManager tpMgr = ManagerLocator.getInstance().getTpManager();
         ServerPlayer senderPlayer = context.getSource().getPlayerOrException();
