@@ -44,7 +44,7 @@
   "cmd.tpa_reply.error.no_request_from_target": "Er is geen teleportatieverzoek openstaand van de opgegeven speler.",
   "cmd.tpask.receive": "${0} wil naar jou teleporteren. Gebruik /tpaccept om te accepteren of /tpdeny om te weigeren.",
   "cmd.tpask.send": "TPA Verzoek naar ${0} is verzonden!",
-  "cmd.tpdeny.success": "Je hebt het TPA Verzoek van ${0} geweigerd."
+  "cmd.tpdeny.success": "Je hebt het TPA Verzoek van ${0} geweigerd.",
   "cmd.tpask.error.exists": "TPA verzoek niet verzonden. Je hebt al een teleportatieverzoek openstaan naar ${0}.",
   "cmd.tpaskhere.receive": "${0} heeft gevraagd om naar jou toe te teleporteren.",
   "cmd.tpcancel.feedback": "TPA Verzoek geannuleerd.",
