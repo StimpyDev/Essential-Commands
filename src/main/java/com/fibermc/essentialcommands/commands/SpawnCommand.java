@@ -30,7 +30,10 @@ public class SpawnCommand implements Command<CommandSourceStack> {
         var senderPlayer = context.getSource().getPlayerOrException();
 
         // Teleport & chat message
-        var styledLocationName = ECText.access(senderPlayer).getText("cmd.spawn.location_name");
+        // Haal de tekst op en forceer de kleur naar geel
+var styledLocationName = ECText.access(senderPlayer).getText("cmd.spawn.location_name")
+    .copy()
+    .withStyle(net.minecraft.ChatFormatting.YELLOW);
 
         PlayerTeleporter.requestTeleport(senderPlayer, loc.get(), styledLocationName);
         return SINGLE_SUCCESS;
