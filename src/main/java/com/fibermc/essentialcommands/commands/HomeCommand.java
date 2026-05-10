@@ -80,11 +80,6 @@ public class HomeCommand implements Command<CommandSourceStack> {
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
         }
 
-        if (senderPlayerData.isInCombat()) {
-            throw CommandUtil.createSimpleException(
-                ecText.getText("teleport.error.in_combat", TextFormatType.Error));
-        }
-
         MutableComponent homeNameText = (MutableComponent) ecText.getText(
             "cmd.home.location_name",
             TextFormatType.Default,
