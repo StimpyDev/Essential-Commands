@@ -53,11 +53,11 @@ public final class TeleportManager {
     }
 
     public void tick(MinecraftServer server) {
-        if (activeTeleportRequests.isEmpty() && queuedTeleportMap.isEmpty() && playersOnTeleportCooldown.isEmpty() && flyCooldownMap.isEmpty()) {
+        if (activeTeleportRequests.size() == 0 && queuedTeleportMap.size() == 0 && playersOnTeleportCooldown.size() == 0 && flyCooldownMap.size() == 0) {
             return;
         }
 
-        if (!activeTeleportRequests.isEmpty()) {
+        if (activeTeleportRequests.size() > 0) {
             activeTeleportRequests.removeIf(request -> {
                 request.incrementAgeTicks();
                 if (request.getAgeTicks() > CONFIG.TELEPORT_REQUEST_DURATION_TICKS) {
@@ -70,32 +70,35 @@ public final class TeleportManager {
             });
         }
 
-        if (!playersOnTeleportCooldown.isEmpty()) {
+        if (playersOnTeleportCooldown.size() > 0) {
             playersOnTeleportCooldown.removeIf(playerData -> {
                 playerData.tickTpCooldown();
                 return playerData.getTpCooldown() < 0;
             });
         }
 
-        if (!flyCooldownMap.isEmpty()) {
-            flyCooldownMap.entrySet().removeIf(entry -> {
-                int remaining = entry.getValue() - 1;
-                if (remaining <= 0) {
-                    ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-                    if (player != null) {
-    player.sendSystemMessage(
-        Component.translatable("cmd.fly.feedback.ready")
-            .withStyle(ChatFormatting.GREEN)
-    );
-}
-                    return true;
-                }
-                entry.setValue(remaining);
-                return false;
-            });
+        if (flyCooldownMap.size() > 0) {
+            for (UUID uuid : flyCooldownMap.keySet()) {
+                flyCooldownMap.compute(uuid, (key, remaining) -> {
+                    if (remaining == null) return null;
+                    
+                    int newVal = remaining - 1;
+                    if (newVal <= 0) {
+                        ServerPlayer player = server.getPlayerList().getPlayer(key);
+                        if (player != null) {
+                            player.sendSystemMessage(
+                                Component.translatable("cmd.fly.feedback.ready")
+                                    .withStyle(ChatFormatting.GREEN)
+                            );
+                        }
+                        return null;
+                    }
+                    return newVal;
+                });
+            }
         }
 
-        if (!queuedTeleportMap.isEmpty()) {
+        if (queuedTeleportMap.size() > 0) {
             var shouldInterruptOnMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE;
             var maxMove = CONFIG.TELEPORT_INTERRUPT_ON_MOVE_AMOUNT;
 
