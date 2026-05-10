@@ -123,13 +123,14 @@ registerNode.accept(Commands.literal("tpahere")
         .executes(new TeleportAskHereCommand()))
     .build());
 
-        if (CONFIG.ENABLE_HOME) {
+if (CONFIG.ENABLE_HOME) {
             LiteralArgumentBuilder<CommandSourceStack> homeBuilder = Commands.literal("home");
             LiteralArgumentBuilder<CommandSourceStack> homeSetBuilder = Commands.literal("set");
             LiteralArgumentBuilder<CommandSourceStack> homeTpBuilder = Commands.literal("tp");
             LiteralArgumentBuilder<CommandSourceStack> homeTpOtherBuilder = Commands.literal("tp_other");
             LiteralArgumentBuilder<CommandSourceStack> homeTpOfflineBuilder = Commands.literal("tp_offline");
             LiteralArgumentBuilder<CommandSourceStack> homeDeleteBuilder = Commands.literal("delete");
+            LiteralArgumentBuilder<CommandSourceStack> homeDeleteConfirmBuilder = Commands.literal("delete_confirm");
             LiteralArgumentBuilder<CommandSourceStack> homeListBuilder = Commands.literal("list");
             LiteralArgumentBuilder<CommandSourceStack> homeListOfflineBuilder = Commands.literal("list_offline");
             LiteralArgumentBuilder<CommandSourceStack> homeOverwriteBuilder = Commands.literal("overwritehome");
@@ -173,6 +174,12 @@ registerNode.accept(Commands.literal("tpahere")
                     .suggests(HomeCommand.Suggestion.LIST_SUGGESTION_PROVIDER)
                     .executes(new HomeDeleteCommand()));
 
+            homeDeleteConfirmBuilder
+                .requires(ECPerms.require(ECPerms.Registry.home_delete, 0))
+                .then(argument("home_name", StringArgumentType.word())
+                    .suggests(HomeCommand.Suggestion.LIST_SUGGESTION_PROVIDER)
+                    .executes(new HomeDeleteCommand()::runConfirm));
+
             homeListBuilder
                 .requires(ECPerms.require(ECPerms.Registry.home_tp, 0))
                 .executes(ListCommandFactory.create(
@@ -193,11 +200,13 @@ registerNode.accept(Commands.literal("tpahere")
             LiteralCommandNode<CommandSourceStack> homeNode = homeBuilder
                 .requires(ECPerms.requireAny(ECPerms.Registry.Group.home_group, 0))
                 .build();
+            
             homeNode.addChild(homeTpBuilder.build());
             homeNode.addChild(homeTpOtherBuilder.build());
             homeNode.addChild(homeTpOfflineBuilder.build());
             homeNode.addChild(homeSetBuilder.build());
             homeNode.addChild(homeDeleteBuilder.build());
+            homeNode.addChild(homeDeleteConfirmBuilder.build());
             homeNode.addChild(homeListBuilder.build());
             homeNode.addChild(homeListOfflineBuilder.build());
 
