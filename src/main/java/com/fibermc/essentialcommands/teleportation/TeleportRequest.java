@@ -56,13 +56,7 @@ public void queue() {
             return;
         }
 
-        QueuedPlayerTeleport queuedTeleport = new QueuedPlayerTeleport(teleportee, tpDestination);
-        
-        PlayerData teleporteeData = ((ServerPlayerEntityAccess) teleportee).ec$getPlayerData();
-        
-        teleporteeData.setPendingTeleport(queuedTeleport);
-
-        PlayerTeleporter.requestTeleport(queuedTeleport);
+        PlayerTeleporter.requestTeleport(new QueuedPlayerTeleport(teleportee, tpDestination));
     }
 
     public void incrementAgeTicks() {
