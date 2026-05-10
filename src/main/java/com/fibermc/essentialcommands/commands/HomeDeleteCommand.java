@@ -34,18 +34,21 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
         }
 
         String confirmCommand = "/home delete_confirm " + homeName;
+        var textAccess = ECText.access(senderPlayer);
 
         MutableComponent message = Component.empty()
-            .append(ECText.access(senderPlayer).getText("cmd.home.delete.confirm_question", ECText.access(senderPlayer).accent(homeName)))
+            .append(textAccess.getText("cmd.home.delete.confirm_question", textAccess.accent(homeName)))
             .append(Component.literal(" "))
-            .append(Component.literal("[BEVESTIGEN]")
-                .withStyle(style -> style
+            .append(Component.literal("[")
+                .append(textAccess.getText("generic.confirm").withStyle(style -> style
                     .withColor(ChatFormatting.GREEN)
                     .withBold(true)
                     .withUnderlined(true)
                     .withItalic(false)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, confirmCommand) {})
-                ));
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, confirmCommand))
+                ))
+                .append(Component.literal("]"))
+            );
 
         senderPlayer.sendSystemMessage(message);
 
