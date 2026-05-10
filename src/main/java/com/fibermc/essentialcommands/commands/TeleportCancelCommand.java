@@ -5,6 +5,7 @@ import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType; // CRUCIAAL voor de build & runtime
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -29,7 +30,7 @@ public class TeleportCancelCommand implements Command<CommandSourceStack> {
 
         var existingTeleportRequests = senderPlayerData.getSentTeleportRequests();
 
-        if (existingTeleportRequests.size() == 0) {
+        if (existingTeleportRequests.isEmpty()) {
             senderPlayer.sendSystemMessage(
                 ECText.getInstance().getText("cmd.tpcancel.error.no_exists")
                     .withStyle(ChatFormatting.RED)
