@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +25,7 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
         ServerPlayer senderPlayer = source.getPlayerOrException();
         PlayerData senderPlayerData = ((ServerPlayerEntityAccess) senderPlayer).ec$getPlayerData();
         String homeName = StringArgumentType.getString(context, "home_name");
-
+        
         if (senderPlayerData.getHomeLocation(homeName) == null) {
             var homeNameText = ECText.access(senderPlayer).accent(homeName);
             senderPlayerData.sendCommandError("cmd.home.delete.error", homeNameText);
@@ -38,17 +37,10 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
 
         MutableComponent message = Component.empty()
             .append(textAccess.getText("cmd.home.delete.confirm_question", textAccess.accent(homeName)))
-            .append(Component.literal(" "))
-            .append(Component.literal("[")
-                .append(textAccess.getText("generic.confirm").withStyle(style -> style
-                    .withColor(ChatFormatting.GREEN)
-                    .withBold(true)
-                    .withUnderlined(true)
-                    .withItalic(false)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, confirmCommand))
-                ))
-                .append(Component.literal("]"))
-            );
+            .append(Component.literal("\n"))
+            .append(Component.literal("Typ ").withStyle(ChatFormatting.GRAY))
+            .append(Component.literal(confirmCommand).withStyle(ChatFormatting.YELLOW))
+            .append(Component.literal(" om te bevestigen.").withStyle(ChatFormatting.GRAY));
 
         senderPlayer.sendSystemMessage(message);
 
