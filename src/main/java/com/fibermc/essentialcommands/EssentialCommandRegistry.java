@@ -85,7 +85,8 @@ public final class EssentialCommandRegistry {
 if (CONFIG.ENABLE_TPA) {
     registerNode.accept(Commands.literal("tpa")
         .requires(ECPerms.require(ECPerms.Registry.tpa, 0))
-        .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
+        .then(Commands.argument("target_player", com.mojang.brigadier.arguments.StringArgumentType.word())
+            .suggests(net.minecraft.commands.synchronization.SuggestionProviders.ASK_FOR_PLAYER)
             .executes(new TeleportAskCommand()))
         .build());
 }
@@ -95,25 +96,28 @@ registerNode.accept(Commands.literal("tpcancel")
                 .executes(new TeleportCancelCommand())
                 .build());
 
-            registerNode.accept(Commands.literal("tpaccept")
-                .requires(ECPerms.require(ECPerms.Registry.tpaccept, 0))
-                .executes(new TeleportAcceptCommand()::runDefault)
-                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
-                    .executes(new TeleportAcceptCommand()))
-                .build());
+           registerNode.accept(Commands.literal("tpaccept")
+    .requires(ECPerms.require(ECPerms.Registry.tpaccept, 0))
+    .executes(new TeleportAcceptCommand()::runDefault)
+    .then(Commands.argument("target_player", com.mojang.brigadier.arguments.StringArgumentType.word())
+        .suggests(net.minecraft.commands.synchronization.SuggestionProviders.ASK_FOR_PLAYER)
+        .executes(new TeleportAcceptCommand()))
+    .build());
 
-            registerNode.accept(Commands.literal("tpdeny")
-                .requires(ECPerms.require(ECPerms.Registry.tpdeny, 0))
-                .executes(new TeleportDenyCommand()::runDefault)
-                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
-                    .executes(new TeleportDenyCommand()))
-                .build());
+registerNode.accept(Commands.literal("tpdeny")
+    .requires(ECPerms.require(ECPerms.Registry.tpdeny, 0))
+    .executes(new TeleportDenyCommand()::runDefault)
+    .then(Commands.argument("target_player", com.mojang.brigadier.arguments.StringArgumentType.word())
+        .suggests(net.minecraft.commands.synchronization.SuggestionProviders.ASK_FOR_PLAYER)
+        .executes(new TeleportDenyCommand()))
+    .build());
 
             registerNode.accept(Commands.literal("tpahere")
-                .requires(ECPerms.require(ECPerms.Registry.tpahere, 0))
-                .then(Commands.argument("target_player", net.minecraft.commands.arguments.EntityArgument.player())
-                    .executes(new TeleportAskHereCommand()))
-                .build());
+    .requires(ECPerms.require(ECPerms.Registry.tpahere, 0))
+    .then(Commands.argument("target_player", com.mojang.brigadier.arguments.StringArgumentType.word())
+        .suggests(net.minecraft.commands.synchronization.SuggestionProviders.ASK_FOR_PLAYER)
+        .executes(new TeleportAskHereCommand()))
+    .build());
 
         if (CONFIG.ENABLE_HOME) {
             LiteralArgumentBuilder<CommandSourceStack> homeBuilder = Commands.literal("home");
