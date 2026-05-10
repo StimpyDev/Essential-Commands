@@ -44,7 +44,7 @@ public class HomeDeleteCommand implements Command<CommandSourceStack> {
                     .withBold(true)
                     .withUnderlined(true)
                     .withItalic(false)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, confirmCommand))
+                    .withClickEvent(new net.minecraft.network.chat.ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND, confirmCommand))
                 ));
 
         senderPlayer.sendSystemMessage(message);
