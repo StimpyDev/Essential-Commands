@@ -90,7 +90,7 @@ public class HomeCommand implements Command<CommandSourceStack> {
             TextFormatType.Default,
             ecText.accent(homeName));
 
-        PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText, false, false);
+        PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText);
         
         return SINGLE_SUCCESS;
     }
