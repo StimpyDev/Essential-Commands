@@ -55,7 +55,7 @@ public class HomeCommand implements Command<CommandSourceStack> {
                 ECText.access(playerData.getPlayer()).getText("cmd.home.tp.error.shortcut_more_than_one", TextFormatType.Error));
         }
 
-        return homeNames.iterator().next(); // iterator().next() is sneller dan stream().findAny().get()
+        return homeNames.iterator().next();
     }
 
     public int runDefault(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -90,7 +90,7 @@ public class HomeCommand implements Command<CommandSourceStack> {
             TextFormatType.Default,
             ecText.accent(homeName));
 
-        PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText);
+        PlayerTeleporter.requestTeleport(senderPlayerData, loc, homeNameText, false, false);
         
         return SINGLE_SUCCESS;
     }
