@@ -76,7 +76,6 @@ public final class TeleportManager {
                 return playerData.getTpCooldown() < 0;
             });
         }
-
         if (flyCooldownMap.size() > 0) {
             for (UUID uuid : flyCooldownMap.keySet()) {
                 flyCooldownMap.compute(uuid, (key, remaining) -> {
@@ -145,16 +144,6 @@ public final class TeleportManager {
     }
 
     public void onPlayerDamaged(ServerPlayer playerEntity, DamageSource damageSource) {
-        if (playerEntity.getAbilities().mayfly) {
-            if (damageSource.getEntity() instanceof ServerPlayer) {
-                FlyCommand.disableFly(playerEntity);
-                
-                var playerData = PlayerData.access(playerEntity);
-                playerData.sendError("cmd.fly.error.combat");
-                
-                flyCooldownMap.put(playerEntity.getUUID(), 300);
-            }
-        }
 
         if (!CONFIG.TELEPORT_INTERRUPT_ON_DAMAGED) return;
 
