@@ -7,6 +7,7 @@ import com.fibermc.essentialcommands.teleportation.TeleportRequest;
 import com.fibermc.essentialcommands.text.ECText;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 import net.minecraft.ChatFormatting;
@@ -15,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportDenyCommand extends TeleportResponseCommand {
     
+    public TeleportDenyCommand() {}
+
     @Override
     protected int exec(CommandContext<CommandSourceStack> context, ServerPlayer respondingPlayer, ServerPlayer requesterPlayer) {
         var respondingPlayerData = PlayerData.access(respondingPlayer);
@@ -39,6 +42,7 @@ public class TeleportDenyCommand extends TeleportResponseCommand {
             );
             return -1;
         }
+        
         requesterPlayer.sendSystemMessage(
             ECText.getInstance().getText("cmd.tpdeny.feedback", respondingPlayer.getDisplayName())
                 .withStyle(ChatFormatting.RED)
